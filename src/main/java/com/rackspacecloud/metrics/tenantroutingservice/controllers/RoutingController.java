@@ -32,7 +32,7 @@ public class RoutingController {
                 routingService.setIngestionRoutingInformation(tenantId, ingestionRoutingInformationInput);
 
         IngestionRoutingInformationOutput out = new IngestionRoutingInformationOutput();
-        out.setPort(routingInformation.getIngestionPort());
+        out.setPath(routingInformation.getIngestionPath());
         return out;
     }
 

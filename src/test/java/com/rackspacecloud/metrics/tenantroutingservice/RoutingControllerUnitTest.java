@@ -42,7 +42,7 @@ public class RoutingControllerUnitTest {
     public void test_setTenantRoutingInformation_validInput_returnsIngestionRoutingInformationOutput(){
         TenantRoutingInformation tenantRoutingInformation = new TenantRoutingInformation();
         tenantRoutingInformation.setTenantId("test_tenantId");
-        tenantRoutingInformation.setIngestionPort(8888);
+        tenantRoutingInformation.setIngestionPath("http://test-path:8086");
         tenantRoutingInformation.setMaxSeriesCount(10000);
 
         when(routingService.setIngestionRoutingInformation(anyString(), any(IngestionRoutingInformationInput.class)))
@@ -51,16 +51,16 @@ public class RoutingControllerUnitTest {
         IngestionRoutingInformationOutput out = controller.setTenantRoutingInformation("test",
                 new IngestionRoutingInformationInput());
 
-        Assert.assertEquals(8888, out.getPort());
+        Assert.assertEquals("http://test-path:8086", out.getPath());
     }
 
     @Test
     public void test_getTenantRoutingInformation_validInput_returnsIngestionRoutingInformationOutput(){
         IngestionRoutingInformationOutput output = new IngestionRoutingInformationOutput();
-        output.setPort(1234);
+        output.setPath("http://test-path:8086");
 
         when(routingService.getIngestionRoutingInformation(anyString())).thenReturn(output);
 
-        Assert.assertEquals(1234, output.getPort());
+        Assert.assertEquals("http://test-path:8086", output.getPath());
     }
 }

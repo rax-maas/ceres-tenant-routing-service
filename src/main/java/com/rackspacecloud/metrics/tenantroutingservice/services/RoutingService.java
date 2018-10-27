@@ -26,7 +26,7 @@ public class RoutingService implements IRoutingService {
 
         Optional<TenantRoutingInformation> oRoutingInformation = routingInformationRepository.findById(tenantId);
 
-        TenantRoutingInformation routingInformation = null;
+        TenantRoutingInformation routingInformation;
         if(oRoutingInformation.isPresent()){
             routingInformation = oRoutingInformation.get();
         }
@@ -34,10 +34,10 @@ public class RoutingService implements IRoutingService {
             routingInformation = new TenantRoutingInformation();
         }
 
-        int port = tenantInfo.getPort();
-        routingInformation.setIngestionPort(port);
+        String path = tenantInfo.getPath();
+        routingInformation.setIngestionPath(path);
         routingInformation.setMaxSeriesCount(tenantInfo.getMaxSeriesCount());
-        routingInformation.getQueryPorts().add(port);
+        routingInformation.getQueryPaths().add(path);
         routingInformation.setTenantId(tenantId);
 
         TenantRoutingInformation routingInfo = routingInformationRepository.save(routingInformation);
@@ -53,7 +53,7 @@ public class RoutingService implements IRoutingService {
         Optional<TenantRoutingInformation> routingInfo = routingInformationRepository.findById(tenantId);
         if(routingInfo.isPresent()){
             IngestionRoutingInformationOutput out = new IngestionRoutingInformationOutput();
-            out.setPort(routingInfo.get().getIngestionPort());
+            out.setPath(routingInfo.get().getIngestionPath());
             return out;
         }
         return null;

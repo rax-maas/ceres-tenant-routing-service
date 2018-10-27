@@ -4,5 +4,5 @@ import lombok.Data;
 
 @Data
 public class IngestionRoutingInformationOutput {
-    private int port;
+    private String path;
 }

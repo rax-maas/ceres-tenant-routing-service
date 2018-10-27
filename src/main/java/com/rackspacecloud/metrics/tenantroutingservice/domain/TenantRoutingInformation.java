@@ -13,11 +13,11 @@ public class TenantRoutingInformation {
     @Id
     private String tenantId;
 
-    private int ingestionPort;
-    private Set<Integer> queryPorts;
+    private String ingestionPath;
+    private Set<String> queryPaths;
     private int maxSeriesCount;
 
     public TenantRoutingInformation(){
-        this.queryPorts = new HashSet<>();
+        this.queryPaths = new HashSet<>();
     }
 }

@@ -7,9 +7,8 @@ import javax.validation.constraints.NotNull;
 
 @Data
 public class IngestionRoutingInformationInput {
-    @NotNull
-    @JsonProperty("port")
-    private int port;
+    @JsonProperty("path")
+    private @NotNull String path;
 
     @NotNull
     @JsonProperty("maxSeriesCount")

@@ -39,7 +39,7 @@ public class RoutingServiceUnitTest {
     public void test_setIngestionRoutingInformation_validInput_returnsTenantRoutingInformation(){
         TenantRoutingInformation tenantRoutingInformation = new TenantRoutingInformation();
         tenantRoutingInformation.setTenantId("test_tenantId");
-        tenantRoutingInformation.setIngestionPort(8888);
+        tenantRoutingInformation.setIngestionPath("http://test-path:8086");
         tenantRoutingInformation.setMaxSeriesCount(10000);
         when(routingInformationRepository.save(any(TenantRoutingInformation.class)))
                 .thenReturn(tenantRoutingInformation);
@@ -47,7 +47,7 @@ public class RoutingServiceUnitTest {
         TenantRoutingInformation routingInfo = routingService.setIngestionRoutingInformation(
                 "test_tenantId", new IngestionRoutingInformationInput());
 
-        Assert.assertEquals(8888, routingInfo.getIngestionPort());
+        Assert.assertEquals("http://test-path:8086", routingInfo.getIngestionPath());
         Assert.assertEquals("test_tenantId", routingInfo.getTenantId());
         Assert.assertEquals(10000, routingInfo.getMaxSeriesCount());
     }
@@ -79,7 +79,7 @@ public class RoutingServiceUnitTest {
     public void test_getIngestionRoutingInformation_validInput_returnsIngestionRoutingInformationOutput(){
         TenantRoutingInformation tenantRoutingInformation = new TenantRoutingInformation();
         tenantRoutingInformation.setTenantId("test_tenantId");
-        tenantRoutingInformation.setIngestionPort(8888);
+        tenantRoutingInformation.setIngestionPath("http://test-path:8086");
         tenantRoutingInformation.setMaxSeriesCount(10000);
 
         when(routingInformationRepository.findById("test_tenantId"))
@@ -88,7 +88,7 @@ public class RoutingServiceUnitTest {
         IngestionRoutingInformationOutput routingInfo =
                 routingService.getIngestionRoutingInformation("test_tenantId");
 
-        Assert.assertEquals(8888, routingInfo.getPort());
+        Assert.assertEquals("http://test-path:8086", routingInfo.getPath());
     }
 
     @Test(expected = IllegalArgumentException.class)

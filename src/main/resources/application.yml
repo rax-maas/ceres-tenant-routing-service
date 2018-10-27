@@ -13,5 +13,5 @@ spring:
   profiles: production
 
 redis:
-  hostname: localhost
-  port: 6379
+  hostname: ${REDIS_HOSTNAME}
+  port: ${REDIS_PORT}
