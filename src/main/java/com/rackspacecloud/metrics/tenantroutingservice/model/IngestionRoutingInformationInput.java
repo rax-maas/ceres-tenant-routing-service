@@ -10,6 +10,9 @@ public class IngestionRoutingInformationInput {
     @JsonProperty("path")
     private @NotNull String path;
 
+    @JsonProperty("databaseName")
+    private @NotNull String databaseName;
+
     @NotNull
     @JsonProperty("maxSeriesCount")
     private int maxSeriesCount;

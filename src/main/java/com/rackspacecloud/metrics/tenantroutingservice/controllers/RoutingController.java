@@ -33,6 +33,7 @@ public class RoutingController {
 
         IngestionRoutingInformationOutput out = new IngestionRoutingInformationOutput();
         out.setPath(routingInformation.getIngestionPath());
+        out.setDatabaseName(routingInformation.getIngestionDatabaseName());
         return out;
     }
 
