@@ -8,8 +8,11 @@ spring:
 redis:
   hostname: localhost
   port: 6379
-management.endpoints.web.exposure.include: "health,jolokia,metrics"
 management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,jolokia,metrics"
   metrics:
     export:
       statsd:
