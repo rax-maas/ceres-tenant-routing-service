@@ -8,6 +8,23 @@ spring:
 redis:
   hostname: localhost
   port: 6379
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,jolokia,metrics"
+  metrics:
+    export:
+      statsd:
+        flavor: ${statsd.flavor:telegraf}
+        host: ${statsd.host:localhost}
+        port: ${statsd.port:8125}
+        enabled: ${statsd.enabled:false}
+      influx:
+        db: telemetry-ambassador
+        host: ${statsd.host:localhost}
+        port: ${statsd.port:8086}
+        enabled: ${influx.enabled:false}
 ---
 spring:
   profiles: production
@@ -15,3 +32,4 @@ spring:
 redis:
   hostname: ${REDIS_HOSTNAME}
   port: ${REDIS_PORT}
+
