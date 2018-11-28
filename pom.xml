@@ -69,7 +69,7 @@
 				<version>0.9.11</version>
 				<configuration>
 					<to>
-						<image>749833639264.dkr.ecr.us-east-1.amazonaws.com/tenant-routing-service</image>
+						<image>gcr.io/ceres-dev-222017/tenant-routing-service</image>
 					</to>
 				</configuration>
 			</plugin>
