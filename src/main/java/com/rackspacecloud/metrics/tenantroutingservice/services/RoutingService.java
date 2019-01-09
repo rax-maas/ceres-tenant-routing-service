@@ -31,16 +31,12 @@ public class RoutingService implements IRoutingService {
             routingInformation = oRoutingInformation.get();
         }
         else{
-            routingInformation = new TenantRoutingInformation();
+            routingInformation = new TenantRoutingInformation(tenantInfo);
         }
 
-        routingInformation.setIngestionPath(tenantInfo.getPath());
-        routingInformation.setIngestionDatabaseName(tenantInfo.getDatabaseName());
-        routingInformation.setMaxSeriesCount(tenantInfo.getMaxSeriesCount());
-
+        routingInformation = new TenantRoutingInformation(tenantInfo);
         // NOTE: following line will update the value for the key if it's already existing in the map.
         // It's assumed that for a given tenant, there will be ONLY ONE database in a given influxdb instance
-        routingInformation.getQueryRoutes().put(tenantInfo.getPath(), tenantInfo.getDatabaseName());
         routingInformation.setTenantId(tenantId);
 
         TenantRoutingInformation routingInfo = routingInformationRepository.save(routingInformation);
@@ -56,8 +52,7 @@ public class RoutingService implements IRoutingService {
         Optional<TenantRoutingInformation> routingInfo = routingInformationRepository.findById(tenantId);
         if(routingInfo.isPresent()){
             IngestionRoutingInformationOutput out = new IngestionRoutingInformationOutput();
-            out.setPath(routingInfo.get().getIngestionPath());
-            out.setDatabaseName(routingInfo.get().getIngestionDatabaseName());
+            //out.setPath(routingInfo.get().getIngestionPath());
             return out;
         }
         return null;

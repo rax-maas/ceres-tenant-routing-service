@@ -40,10 +40,12 @@ public class RoutingControllerUnitTest {
 
     @Test
     public void test_setTenantRoutingInformation_validInput_returnsIngestionRoutingInformationOutput(){
-        TenantRoutingInformation tenantRoutingInformation = new TenantRoutingInformation();
+        IngestionRoutingInformationInput input = new IngestionRoutingInformationInput();
+        input.setDatabaseName("test_tenantId");
+        input.setPath("http://test-path:8086");
+        TenantRoutingInformation tenantRoutingInformation = new TenantRoutingInformation(input);
         tenantRoutingInformation.setTenantId("test_tenantId");
-        tenantRoutingInformation.setIngestionPath("http://test-path:8086");
-        tenantRoutingInformation.setMaxSeriesCount(10000);
+
 
         when(routingService.setIngestionRoutingInformation(anyString(), any(IngestionRoutingInformationInput.class)))
                 .thenReturn(tenantRoutingInformation);
