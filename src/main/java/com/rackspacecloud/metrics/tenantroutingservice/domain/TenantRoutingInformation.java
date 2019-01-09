@@ -14,6 +14,7 @@ public class TenantRoutingInformation {
     @Id
     private String tenantId;
 
+    @JsonProperty("path")
     private String path;
 
     @JsonProperty("retentionPolicies")

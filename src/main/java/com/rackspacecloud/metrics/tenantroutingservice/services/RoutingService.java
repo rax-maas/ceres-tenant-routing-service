@@ -52,7 +52,8 @@ public class RoutingService implements IRoutingService {
         Optional<TenantRoutingInformation> routingInfo = routingInformationRepository.findById(tenantId);
         if(routingInfo.isPresent()){
             IngestionRoutingInformationOutput out = new IngestionRoutingInformationOutput();
-            //out.setPath(routingInfo.get().getIngestionPath());
+            out.setPath(routingInfo.get().getIngestionPath());
+            out.setRetentionPolicies(routingInfo.get().getRetentionPolicies());
             return out;
         }
         return null;
