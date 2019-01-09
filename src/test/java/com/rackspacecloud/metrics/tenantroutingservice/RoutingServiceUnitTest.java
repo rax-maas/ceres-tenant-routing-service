@@ -84,8 +84,7 @@ public class RoutingServiceUnitTest {
 
         TenantRoutingInformation tenantRoutingInformation = new TenantRoutingInformation(input);
         tenantRoutingInformation.setTenantId("test_tenantId");
-        tenantRoutingInformation.setIngestionPath("http://test-path:8086");
-        tenantRoutingInformation.setMaxSeriesCount(10000);
+
 
         when(routingInformationRepository.findById("test_tenantId"))
                 .thenReturn(Optional.ofNullable(tenantRoutingInformation));
