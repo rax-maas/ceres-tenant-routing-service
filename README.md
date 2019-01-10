@@ -25,47 +25,49 @@ Max series count (i.e. 1K, 10K, or 100K). It’s more like S, M, L (Small, Mediu
 ```
 {
 	"tenantId": "hybrid:12345",
-	"full" : {
-		"path": "http://data-influxdb:8086",
-		"databaseName": "db_hybrid_12345",
-		"retentionPolicyName": "rp_5d",
-		"retentionPolicy": "5d",
-		"maxSeriesCount": 100000
-	},
-	"5m" : {
-		"path": "http://data-influxdb:8086",
-		"databaseName": "db_hybrid_12345",
-		"retentionPolicyName": "rp_10d",
-		"retentionPolicy": "10d",
-		"maxSeriesCount": 100000
-	},
-	"20m" : {
-		"path": "http://data-influxdb:8086",
-		"databaseName": "db_hybrid_12345",
-		"retentionPolicyName": "rp_20d",
-		"retentionPolicy": "20d",
-		"maxSeriesCount": 100000
-	},
-	"60m" : {
-		"path": "http://data-influxdb:8086",
-		"databaseName": "db_hybrid_12345",
-		"retentionPolicyName": "rp_155d",
-		"retentionPolicy": "155d",
-		"maxSeriesCount": 100000
-	},
-	"240m" : {
-		"path": "http://data-influxdb:8086",
-		"databaseName": "db_hybrid_12345",
-		"retentionPolicyName": "rp_300d",
-		"retentionPolicy": "300d",
-		"maxSeriesCount": 100000
-	},
-	"1440m" : {
-		"path": "http://data-influxdb:8086",
-		"databaseName": "db_hybrid_12345",
-		"retentionPolicyName": "rp_1825d",
-		"retentionPolicy": "1825d",
-		"maxSeriesCount": 100000
+	"routes" : {
+		"full" : {
+			"path": "http://data-influxdb:8086",
+			"databaseName": "db_hybrid_12345",
+			"retentionPolicyName": "rp_5d",
+			"retentionPolicy": "5d",
+			"maxSeriesCount": 100000
+		},
+		"5m" : {
+			"path": "http://data-influxdb:8086",
+			"databaseName": "db_hybrid_12345",
+			"retentionPolicyName": "rp_10d",
+			"retentionPolicy": "10d",
+			"maxSeriesCount": 100000
+		},
+		"20m" : {
+			"path": "http://data-influxdb:8086",
+			"databaseName": "db_hybrid_12345",
+			"retentionPolicyName": "rp_20d",
+			"retentionPolicy": "20d",
+			"maxSeriesCount": 100000
+		},
+		"60m" : {
+			"path": "http://data-influxdb:8086",
+			"databaseName": "db_hybrid_12345",
+			"retentionPolicyName": "rp_155d",
+			"retentionPolicy": "155d",
+			"maxSeriesCount": 100000
+		},
+		"240m" : {
+			"path": "http://data-influxdb:8086",
+			"databaseName": "db_hybrid_12345",
+			"retentionPolicyName": "rp_300d",
+			"retentionPolicy": "300d",
+			"maxSeriesCount": 100000
+		},
+		"1440m" : {
+			"path": "http://data-influxdb:8086",
+			"databaseName": "db_hybrid_12345",
+			"retentionPolicyName": "rp_1825d",
+			"retentionPolicy": "1825d",
+			"maxSeriesCount": 100000
+		}
 	}
 }
 ```
