@@ -1,7 +1,6 @@
 package com.rackspacecloud.metrics.tenantroutingservice;
 
 import com.rackspacecloud.metrics.tenantroutingservice.controllers.RoutingController;
-import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantRoutingInformation;
 import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationInput;
 import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationOutput;
 import com.rackspacecloud.metrics.tenantroutingservice.services.RoutingService;
@@ -38,7 +37,7 @@ public class RoutingControllerUnitTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    @Test
+    /*@Test
     public void test_setTenantRoutingInformation_validInput_returnsIngestionRoutingInformationOutput(){
         IngestionRoutingInformationInput input = new IngestionRoutingInformationInput();
         input.setDatabaseName("test_tenantId");
@@ -64,5 +63,5 @@ public class RoutingControllerUnitTest {
         when(routingService.getIngestionRoutingInformation(anyString())).thenReturn(output);
 
         Assert.assertEquals("http://test-path:8086", output.getPath());
-    }
+    }*/
 }

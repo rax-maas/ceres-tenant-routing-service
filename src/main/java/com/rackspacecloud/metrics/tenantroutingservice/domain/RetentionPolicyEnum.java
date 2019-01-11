@@ -49,16 +49,22 @@ public enum RetentionPolicyEnum {
     public String retentionPolicy;
     public int maxSeriesCount = 100000;
     public String databaseName;
+    public String path;
 
     private RetentionPolicyEnum(String policyName, String policy){
         retentionPolicyName = policyName;
         retentionPolicy = policy;
     }
 
-    public String toString() {
-        return this.name();
-    }
-    public void setDatabaseName(String dbName) {
+    public abstract String toString();
+
+    public RetentionPolicyEnum setDatabaseName(String dbName) {
         databaseName = dbName;
+        return this;
+    }
+
+    public RetentionPolicyEnum setPath(String path) {
+        this.path = path;
+        return this;
     }
 }

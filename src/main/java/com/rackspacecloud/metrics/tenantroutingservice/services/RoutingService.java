@@ -1,13 +1,16 @@
 package com.rackspacecloud.metrics.tenantroutingservice.services;
 
+import com.rackspacecloud.metrics.tenantroutingservice.domain.RetentionPolicyEnum;
+import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantRoutes;
 import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationInput;
 import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationOutput;
-import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantRoutingInformation;
 import com.rackspacecloud.metrics.tenantroutingservice.repositories.ITenantRoutingInformationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -16,7 +19,7 @@ public class RoutingService implements IRoutingService {
     ITenantRoutingInformationRepository routingInformationRepository;
 
     @Override
-    public TenantRoutingInformation setIngestionRoutingInformation(
+    public TenantRoutes setIngestionRoutingInformation(
             String tenantId, IngestionRoutingInformationInput tenantInfo) {
 
         if(StringUtils.isEmpty(tenantId) || StringUtils.isEmpty(tenantId.trim()))
@@ -24,22 +27,22 @@ public class RoutingService implements IRoutingService {
 
         if(tenantInfo == null) throw new IllegalArgumentException("'tenantInfo' is null.");
 
-        Optional<TenantRoutingInformation> oRoutingInformation = routingInformationRepository.findById(tenantId);
+        Optional<TenantRoutes> oRoutingInformation = routingInformationRepository.findById(tenantId);
 
-        TenantRoutingInformation routingInformation;
+        TenantRoutes routingInformation;
         if(oRoutingInformation.isPresent()){
             routingInformation = oRoutingInformation.get();
         }
         else{
-            routingInformation = new TenantRoutingInformation(tenantInfo);
+
+            routingInformation = new TenantRoutes(tenantInfo, createListOfDefaultRoutes());
         }
 
-        routingInformation = new TenantRoutingInformation(tenantInfo);
         // NOTE: following line will update the value for the key if it's already existing in the map.
         // It's assumed that for a given tenant, there will be ONLY ONE database in a given influxdb instance
         routingInformation.setTenantId(tenantId);
 
-        TenantRoutingInformation routingInfo = routingInformationRepository.save(routingInformation);
+        TenantRoutes routingInfo = routingInformationRepository.save(routingInformation);
         return routingInfo;
     }
 
@@ -49,13 +52,24 @@ public class RoutingService implements IRoutingService {
         if(StringUtils.isEmpty(tenantId) || StringUtils.isEmpty(tenantId.trim()))
             throw new IllegalArgumentException("'tenantId' is null, empty or contains all whitespaces.");
 
-        Optional<TenantRoutingInformation> routingInfo = routingInformationRepository.findById(tenantId);
+        Optional<TenantRoutes> routingInfo = routingInformationRepository.findById(tenantId);
         if(routingInfo.isPresent()){
             IngestionRoutingInformationOutput out = new IngestionRoutingInformationOutput();
-            out.setPath(routingInfo.get().getIngestionPath());
-            out.setRetentionPolicies(routingInfo.get().getRetentionPolicies());
+            out.setRoutes(routingInfo.get().getRoutes());
             return out;
         }
         return null;
+    }
+
+    private List<RetentionPolicyEnum> createListOfDefaultRoutes(){
+        List<RetentionPolicyEnum> list = new LinkedList();
+        list.add(RetentionPolicyEnum.FULL);
+        list.add(RetentionPolicyEnum.FIVE_MINUTES);
+        list.add(RetentionPolicyEnum.TWENTY_MINUTES);
+        list.add(RetentionPolicyEnum.ONE_HOUR);
+        list.add(RetentionPolicyEnum.FOUR_HOURS);
+        list.add(RetentionPolicyEnum.ONE_DAY);
+
+        return list;
     }
 }

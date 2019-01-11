@@ -1,6 +1,6 @@
 package com.rackspacecloud.metrics.tenantroutingservice.controllers;
 
-import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantRoutingInformation;
+import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantRoutes;
 import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationInput;
 import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationOutput;
 import com.rackspacecloud.metrics.tenantroutingservice.services.IRoutingService;
@@ -24,17 +24,17 @@ public class RoutingController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public IngestionRoutingInformationOutput setTenantRoutingInformation(
+    public TenantRoutes setTenantRoutingInformation(
             @PathVariable final String tenantId,
             @RequestBody final IngestionRoutingInformationInput ingestionRoutingInformationInput
     ){
-        TenantRoutingInformation routingInformation =
+        TenantRoutes routingInformation =
                 routingService.setIngestionRoutingInformation(tenantId, ingestionRoutingInformationInput);
 
         IngestionRoutingInformationOutput out = new IngestionRoutingInformationOutput();
-        out.setPath(routingInformation.getPath());
-        out.setRetentionPolicies(routingInformation.getRetentionPolicies());
-        return out;
+        //out.setPath(routingInformation.getPath());
+        //out.setRetentionPolicies(routingInformation.getRetentionPolicies());
+        return routingInformation;
     }
 
     @RequestMapping(

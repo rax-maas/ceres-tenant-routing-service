@@ -1,12 +1,10 @@
 package com.rackspacecloud.metrics.tenantroutingservice.model;
 
-import com.rackspacecloud.metrics.tenantroutingservice.domain.RetentionPolicy;
+import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantRoutes;
 import lombok.Data;
-
-import java.util.List;
+import java.util.Map;
 
 @Data
 public class IngestionRoutingInformationOutput {
-    private String path;
-    private List<RetentionPolicy> retentionPolicies;
+    private Map<String, TenantRoutes.TenantRoute> routes;
 }
