@@ -47,7 +47,7 @@ public class RoutingService implements IRoutingService {
     }
 
     @Override
-    public IngestionRoutingInformationOutput getIngestionRoutingInformation(String tenantId) {
+    public TenantRoutes getIngestionRoutingInformation(String tenantId) {
 
         if(StringUtils.isEmpty(tenantId) || StringUtils.isEmpty(tenantId.trim()))
             throw new IllegalArgumentException("'tenantId' is null, empty or contains all whitespaces.");
@@ -56,7 +56,7 @@ public class RoutingService implements IRoutingService {
         if(routingInfo.isPresent()){
             IngestionRoutingInformationOutput out = new IngestionRoutingInformationOutput();
             out.setRoutes(routingInfo.get().getRoutes());
-            return out;
+            return routingInfo.get();
         }
         return null;
     }

@@ -31,9 +31,6 @@ public class RoutingController {
         TenantRoutes routingInformation =
                 routingService.setIngestionRoutingInformation(tenantId, ingestionRoutingInformationInput);
 
-        IngestionRoutingInformationOutput out = new IngestionRoutingInformationOutput();
-        //out.setPath(routingInformation.getPath());
-        //out.setRetentionPolicies(routingInformation.getRetentionPolicies());
         return routingInformation;
     }
 
@@ -42,7 +39,7 @@ public class RoutingController {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public IngestionRoutingInformationOutput getTenantRoutingInformation(@PathVariable final String tenantId){
+    public TenantRoutes getTenantRoutingInformation(@PathVariable final String tenantId){
         return routingService.getIngestionRoutingInformation(tenantId);
     }
 
@@ -53,7 +50,7 @@ public class RoutingController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public IngestionRoutingInformationOutput setTenantRoutingInformation(@PathVariable final String tenantId, @PathVariable String databasePath){
+    public TenantRoutes setTenantRoutingInformation(@PathVariable final String tenantId, @PathVariable String databasePath){
         return routingService.getIngestionRoutingInformation(tenantId);
     }
 }

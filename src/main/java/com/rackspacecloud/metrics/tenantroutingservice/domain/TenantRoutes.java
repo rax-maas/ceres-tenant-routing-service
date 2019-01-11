@@ -38,11 +38,12 @@ public class TenantRoutes {
         private String databaseName;
         private String retentionPolicyName;
         private String retentionPolicy;
+        private int maxSeriesCount;
 
         public TenantRoute(RetentionPolicyEnum enumeration) {
             retentionPolicyName = enumeration.retentionPolicyName;
             retentionPolicy = enumeration.retentionPolicy;
-
+            maxSeriesCount = enumeration.maxSeriesCount;
             if(enumeration.databaseName != null) {
                 databaseName = enumeration.databaseName;
             }

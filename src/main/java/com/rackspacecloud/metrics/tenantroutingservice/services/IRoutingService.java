@@ -19,5 +19,5 @@ public interface IRoutingService {
      * @param tenantId
      * @return
      */
-    IngestionRoutingInformationOutput getIngestionRoutingInformation(String tenantId);
+    TenantRoutes getIngestionRoutingInformation(String tenantId);
 }

@@ -1,6 +1,8 @@
 package com.rackspacecloud.metrics.tenantroutingservice;
 
 import com.rackspacecloud.metrics.tenantroutingservice.controllers.RoutingController;
+import com.rackspacecloud.metrics.tenantroutingservice.domain.RetentionPolicyEnum;
+import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantRoutes;
 import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationInput;
 import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationOutput;
 import com.rackspacecloud.metrics.tenantroutingservice.services.RoutingService;
@@ -15,6 +17,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.LinkedList;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -37,31 +42,39 @@ public class RoutingControllerUnitTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    /*@Test
+    @Test
     public void test_setTenantRoutingInformation_validInput_returnsIngestionRoutingInformationOutput(){
         IngestionRoutingInformationInput input = new IngestionRoutingInformationInput();
         input.setDatabaseName("test_tenantId");
         input.setPath("http://test-path:8086");
-        TenantRoutingInformation tenantRoutingInformation = new TenantRoutingInformation(input);
+        List<RetentionPolicyEnum> list = new LinkedList();
+        list.add(RetentionPolicyEnum.FULL);
+        list.add(RetentionPolicyEnum.FIVE_MINUTES);
+        list.add(RetentionPolicyEnum.TWENTY_MINUTES);
+        list.add(RetentionPolicyEnum.ONE_HOUR);
+        list.add(RetentionPolicyEnum.FOUR_HOURS);
+        list.add(RetentionPolicyEnum.ONE_DAY);
+
+        TenantRoutes tenantRoutingInformation = new TenantRoutes(input, list);
         tenantRoutingInformation.setTenantId("test_tenantId");
 
 
         when(routingService.setIngestionRoutingInformation(anyString(), any(IngestionRoutingInformationInput.class)))
                 .thenReturn(tenantRoutingInformation);
 
-        IngestionRoutingInformationOutput out = controller.setTenantRoutingInformation("test",
+        TenantRoutes out = controller.setTenantRoutingInformation("test",
                 new IngestionRoutingInformationInput());
 
-        Assert.assertEquals("http://test-path:8086", out.getPath());
+        Assert.assertEquals("http://test-path:8086", out.getRoutes().get("FULL").getPath());
     }
 
     @Test
     public void test_getTenantRoutingInformation_validInput_returnsIngestionRoutingInformationOutput(){
-        IngestionRoutingInformationOutput output = new IngestionRoutingInformationOutput();
-        output.setPath("http://test-path:8086");
+        TenantRoutes output = new TenantRoutes();
+        output.setTenantId("test_tenantId");
 
         when(routingService.getIngestionRoutingInformation(anyString())).thenReturn(output);
 
-        Assert.assertEquals("http://test-path:8086", output.getPath());
-    }*/
+        Assert.assertEquals("http://test-path:8086", output.getRoutes().get("FULL"));
+    }
 }
