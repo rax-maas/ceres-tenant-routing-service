@@ -1,6 +1,6 @@
 package com.rackspacecloud.metrics.tenantroutingservice.services;
 
-import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantRoutingInformation;
+import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantRoutes;
 import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationInput;
 import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationOutput;
 
@@ -11,7 +11,7 @@ public interface IRoutingService {
      * @param routingInformation
      * @return
      */
-    TenantRoutingInformation setIngestionRoutingInformation(
+    TenantRoutes setIngestionRoutingInformation(
             String tenantId, IngestionRoutingInformationInput routingInformation);
 
     /**
@@ -19,5 +19,5 @@ public interface IRoutingService {
      * @param tenantId
      * @return
      */
-    IngestionRoutingInformationOutput getIngestionRoutingInformation(String tenantId);
+    TenantRoutes getIngestionRoutingInformation(String tenantId);
 }

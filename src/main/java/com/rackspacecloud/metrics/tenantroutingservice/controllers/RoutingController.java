@@ -1,6 +1,6 @@
 package com.rackspacecloud.metrics.tenantroutingservice.controllers;
 
-import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantRoutingInformation;
+import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantRoutes;
 import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationInput;
 import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationOutput;
 import com.rackspacecloud.metrics.tenantroutingservice.services.IRoutingService;
@@ -24,17 +24,14 @@ public class RoutingController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public IngestionRoutingInformationOutput setTenantRoutingInformation(
+    public TenantRoutes setTenantRoutingInformation(
             @PathVariable final String tenantId,
             @RequestBody final IngestionRoutingInformationInput ingestionRoutingInformationInput
     ){
-        TenantRoutingInformation routingInformation =
+        TenantRoutes routingInformation =
                 routingService.setIngestionRoutingInformation(tenantId, ingestionRoutingInformationInput);
 
-        IngestionRoutingInformationOutput out = new IngestionRoutingInformationOutput();
-        out.setPath(routingInformation.getIngestionPath());
-        out.setDatabaseName(routingInformation.getIngestionDatabaseName());
-        return out;
+        return routingInformation;
     }
 
     @RequestMapping(
@@ -42,7 +39,18 @@ public class RoutingController {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public IngestionRoutingInformationOutput getTenantRoutingInformation(@PathVariable final String tenantId){
+    public TenantRoutes getTenantRoutingInformation(@PathVariable final String tenantId){
+        return routingService.getIngestionRoutingInformation(tenantId);
+    }
+
+
+    @RequestMapping(
+            value = "/test/{tenantId}",
+            method = RequestMethod.POST,
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public TenantRoutes setTenantRoutingInformation(@PathVariable final String tenantId, @PathVariable String databasePath){
         return routingService.getIngestionRoutingInformation(tenantId);
     }
 }
