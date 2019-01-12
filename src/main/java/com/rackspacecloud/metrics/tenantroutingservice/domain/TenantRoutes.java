@@ -24,7 +24,7 @@ public class TenantRoutes {
     }
 
     public TenantRoutes(IngestionRoutingInformationInput input, List<RetentionPolicyEnum> defaultRoutes) {
-        routes = new HashMap<>();
+        this();
         for(RetentionPolicyEnum value : defaultRoutes) {
             value.setDatabaseName(input.getDatabaseName()).setPath(input.getPath());
             routes.put(value.toString(), new TenantRoute(value));

@@ -10,28 +10,9 @@ import java.util.*;
 
 @Data
 public class IngestionRoutingInformationInput {
-
-
     @JsonProperty("path")
     private @NotNull String path;
 
     @JsonProperty("databaseName")
     private String databaseName;
-
-    public String getPath() {
-        return path;
-    }
-
-    public String getDatabaseName() {
-        return databaseName;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public void setDatabaseName(String databaseName) {
-        this.databaseName = databaseName;
-    }
-
 }
