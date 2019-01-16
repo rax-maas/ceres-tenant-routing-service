@@ -3,7 +3,6 @@ package com.rackspacecloud.metrics.tenantroutingservice.services;
 import com.rackspacecloud.metrics.tenantroutingservice.domain.RetentionPolicyEnum;
 import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantRoutes;
 import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationInput;
-import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationOutput;
 import com.rackspacecloud.metrics.tenantroutingservice.repositories.ITenantRoutingInformationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,7 +33,6 @@ public class RoutingService implements IRoutingService {
             routingInformation = oRoutingInformation.get();
         }
         else{
-
             routingInformation = new TenantRoutes(tenantInfo, createListOfDefaultRoutes());
         }
 
@@ -47,6 +45,17 @@ public class RoutingService implements IRoutingService {
     }
 
     @Override
+    public TenantRoutes setIngestionRoutingInformation(String tenantId, TenantRoutes routingInformation) {
+        if(StringUtils.isEmpty(tenantId) || StringUtils.isEmpty(tenantId.trim()))
+            throw new IllegalArgumentException("'tenantId' is null, empty or contains all whitespaces.");
+
+        if(routingInformation == null) throw new IllegalArgumentException("'routingInformation' is null.");
+
+        routingInformation.setTenantId(tenantId);
+        return routingInformationRepository.save(routingInformation);
+    }
+
+    @Override
     public TenantRoutes getIngestionRoutingInformation(String tenantId) {
 
         if(StringUtils.isEmpty(tenantId) || StringUtils.isEmpty(tenantId.trim()))
@@ -54,11 +63,17 @@ public class RoutingService implements IRoutingService {
 
         Optional<TenantRoutes> routingInfo = routingInformationRepository.findById(tenantId);
         if(routingInfo.isPresent()){
-            IngestionRoutingInformationOutput out = new IngestionRoutingInformationOutput();
-            out.setRoutes(routingInfo.get().getRoutes());
             return routingInfo.get();
         }
         return null;
+    }
+
+    @Override
+    public void removeIngestionRoutingInformation(String tenantId) {
+        if(StringUtils.isEmpty(tenantId) || StringUtils.isEmpty(tenantId.trim()))
+            throw new IllegalArgumentException("'tenantId' is null, empty or contains all whitespaces.");
+
+        routingInformationRepository.deleteById(tenantId);
     }
 
     private List<RetentionPolicyEnum> createListOfDefaultRoutes(){

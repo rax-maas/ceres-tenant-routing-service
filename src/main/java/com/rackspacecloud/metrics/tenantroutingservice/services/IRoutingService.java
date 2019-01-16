@@ -2,7 +2,6 @@ package com.rackspacecloud.metrics.tenantroutingservice.services;
 
 import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantRoutes;
 import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationInput;
-import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationOutput;
 
 public interface IRoutingService {
     /**
@@ -14,10 +13,21 @@ public interface IRoutingService {
     TenantRoutes setIngestionRoutingInformation(
             String tenantId, IngestionRoutingInformationInput routingInformation);
 
+
+    TenantRoutes setIngestionRoutingInformation(
+            String tenantId, TenantRoutes routingInformation);
+
     /**
      * Get Ingestion Routing Information for given tenantId
      * @param tenantId
      * @return
      */
     TenantRoutes getIngestionRoutingInformation(String tenantId);
+
+    /**
+     * Remove Ingestion Routing Information for given tenantId
+     * @param tenantId
+     * @return
+     */
+    void removeIngestionRoutingInformation(String tenantId);
 }

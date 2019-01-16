@@ -4,7 +4,6 @@ import com.rackspacecloud.metrics.tenantroutingservice.controllers.RoutingContro
 import com.rackspacecloud.metrics.tenantroutingservice.domain.RetentionPolicyEnum;
 import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantRoutes;
 import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationInput;
-import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationOutput;
 import com.rackspacecloud.metrics.tenantroutingservice.services.RoutingService;
 import org.junit.Assert;
 import org.junit.Before;
