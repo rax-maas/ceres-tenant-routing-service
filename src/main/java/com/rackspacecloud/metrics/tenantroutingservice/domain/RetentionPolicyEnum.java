@@ -47,7 +47,7 @@ public enum RetentionPolicyEnum {
     };
     public String retentionPolicyName;
     public String retentionPolicy;
-    public int maxSeriesCount = 100000;
+    public int maxSeriesCount = 10000;
     public String databaseName;
     public String path;
 
