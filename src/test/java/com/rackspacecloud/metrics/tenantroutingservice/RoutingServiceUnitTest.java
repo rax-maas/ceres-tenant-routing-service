@@ -58,11 +58,11 @@ public class RoutingServiceUnitTest {
                 .thenReturn(tenantRoutes);
 
         TenantRoutes routingInfo = routingService.setIngestionRoutingInformation(
-                "test_tenantId", new IngestionRoutingInformationInput());
+                "test_tenantId", input);
 
-        Assert.assertEquals("http://test-path:8086", routingInfo.getRoutes().get("FULL").getPath());
+        Assert.assertEquals("http://test-path:8086", routingInfo.getRoutes().get("full").getPath());
         Assert.assertEquals("test_tenantId", routingInfo.getTenantId());
-        Assert.assertEquals(10000, routingInfo.getRoutes().get("FULL").getMaxSeriesCount());
+        Assert.assertEquals(10000, routingInfo.getRoutes().get("full").getMaxSeriesCount());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -85,7 +85,8 @@ public class RoutingServiceUnitTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void test_setIngestionRoutingInformation_nullTenantInfo_throwsIllegalArgumentException(){
-        //Assert.assertNull(routingService.setIngestionRoutingInformation("test", null));
+        IngestionRoutingInformationInput input  = null;
+        Assert.assertNull(routingService.setIngestionRoutingInformation("test", input));
     }
 
     @Test
@@ -104,7 +105,7 @@ public class RoutingServiceUnitTest {
         TenantRoutes routingInfo =
                 routingService.getIngestionRoutingInformation("test_tenantId");
 
-        Assert.assertEquals("http://test-path:8086", routingInfo.getRoutes().get("FULL").getPath());
+            Assert.assertEquals("http://test-path:8086", routingInfo.getRoutes().get("full").getPath());
     }
 
     @Test(expected = IllegalArgumentException.class)
