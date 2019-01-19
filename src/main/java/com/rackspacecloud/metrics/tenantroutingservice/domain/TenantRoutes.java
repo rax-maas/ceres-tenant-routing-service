@@ -23,8 +23,17 @@ public class TenantRoutes {
         routes = new HashMap<>();
     }
 
-    public TenantRoutes(IngestionRoutingInformationInput input, List<RetentionPolicyEnum> defaultRoutes) {
+    private void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    public TenantRoutes(
+            String tenantId,
+            IngestionRoutingInformationInput input,
+            List<RetentionPolicyEnum> defaultRoutes) {
+
         this();
+        this.setTenantId(tenantId);
         for(RetentionPolicyEnum value : defaultRoutes) {
             value.setDatabaseName(input.getDatabaseName()).setPath(input.getPath());
             routes.put(value.toString(), new TenantRoute(value));

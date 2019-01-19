@@ -2,9 +2,10 @@ package com.rackspacecloud.metrics.tenantroutingservice;
 
 import com.rackspacecloud.metrics.tenantroutingservice.domain.RetentionPolicyEnum;
 import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantRoutes;
+import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteNotFoundException;
 import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationInput;
 import com.rackspacecloud.metrics.tenantroutingservice.repositories.ITenantRoutingInformationRepository;
-import com.rackspacecloud.metrics.tenantroutingservice.services.RoutingService;
+import com.rackspacecloud.metrics.tenantroutingservice.services.RoutingServiceImpl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,13 +25,13 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-public class RoutingServiceUnitTest {
+public class RoutingServiceImplUnitTest {
 
     @Mock
     private ITenantRoutingInformationRepository routingInformationRepository;
 
     @InjectMocks
-    private RoutingService routingService;
+    private RoutingServiceImpl routingServiceImpl;
 
     private List<RetentionPolicyEnum> list;
 
@@ -52,12 +53,11 @@ public class RoutingServiceUnitTest {
         IngestionRoutingInformationInput input = new IngestionRoutingInformationInput();
         input.setDatabaseName("test_tenantId");
         input.setPath("http://test-path:8086");
-        TenantRoutes tenantRoutes = new TenantRoutes(input, list);
-        tenantRoutes.setTenantId("test_tenantId");
+        TenantRoutes tenantRoutes = new TenantRoutes("test_tenantId", input, list);
         when(routingInformationRepository.save(any(TenantRoutes.class)))
                 .thenReturn(tenantRoutes);
 
-        TenantRoutes routingInfo = routingService.setIngestionRoutingInformation(
+        TenantRoutes routingInfo = routingServiceImpl.setIngestionRoutingInformation(
                 "test_tenantId", input);
 
         Assert.assertEquals("http://test-path:8086", routingInfo.getRoutes().get("full").getPath());
@@ -67,26 +67,26 @@ public class RoutingServiceUnitTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void test_setIngestionRoutingInformation_emptyTenantId_throwsIllegalArgumentException(){
-        Assert.assertNull(routingService.setIngestionRoutingInformation(
+        Assert.assertNull(routingServiceImpl.setIngestionRoutingInformation(
                 "", new IngestionRoutingInformationInput()));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void test_setIngestionRoutingInformation_nullTenantId_throwsIllegalArgumentException(){
-        Assert.assertNull(routingService.setIngestionRoutingInformation(
+        Assert.assertNull(routingServiceImpl.setIngestionRoutingInformation(
                 null, new IngestionRoutingInformationInput()));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void test_setIngestionRoutingInformation_whitespacedTenantId_throwsIllegalArgumentException(){
-        Assert.assertNull(routingService.setIngestionRoutingInformation(
+        Assert.assertNull(routingServiceImpl.setIngestionRoutingInformation(
                 "  ", new IngestionRoutingInformationInput()));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void test_setIngestionRoutingInformation_nullTenantInfo_throwsIllegalArgumentException(){
         IngestionRoutingInformationInput input  = null;
-        Assert.assertNull(routingService.setIngestionRoutingInformation("test", input));
+        Assert.assertNull(routingServiceImpl.setIngestionRoutingInformation("test", input));
     }
 
     @Test
@@ -95,44 +95,41 @@ public class RoutingServiceUnitTest {
         input.setDatabaseName("test_tenantId");
         input.setPath("http://test-path:8086");
 
-        TenantRoutes routes = new TenantRoutes(input, list);
-        routes.setTenantId("test_tenantId");
+        TenantRoutes routes = new TenantRoutes("test_tenantId", input, list);
 
 
         when(routingInformationRepository.findById("test_tenantId"))
                 .thenReturn(Optional.ofNullable(routes));
 
         TenantRoutes routingInfo =
-                routingService.getIngestionRoutingInformation("test_tenantId");
+                routingServiceImpl.getIngestionRoutingInformation("test_tenantId");
 
             Assert.assertEquals("http://test-path:8086", routingInfo.getRoutes().get("full").getPath());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void test_getIngestionRoutingInformation_emptyTenantId_throwsIllegalArgumentException(){
-        Assert.assertNull(routingService.getIngestionRoutingInformation(""));
+        Assert.assertNull(routingServiceImpl.getIngestionRoutingInformation(""));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void test_getIngestionRoutingInformation_nullTenantId_throwsIllegalArgumentException(){
-        Assert.assertNull(routingService.getIngestionRoutingInformation(null));
+        Assert.assertNull(routingServiceImpl.getIngestionRoutingInformation(null));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void test_getIngestionRoutingInformation_whitespacedTenantId_throwsIllegalArgumentException(){
-        Assert.assertNull(routingService.getIngestionRoutingInformation("  "));
+        Assert.assertNull(routingServiceImpl.getIngestionRoutingInformation("  "));
     }
 
-    @Test
-    public void test_getIngestionRoutingInformation_wrongTenantId_returnsNullIngestionRoutingInformationOutput(){
+    @Test(expected = RouteNotFoundException.class)
+    public void test_getIngestionRoutingInformation_wrongTenantId_throwsRouteNotFoundException(){
         TenantRoutes tenantRoutingInformation = null;
 
         when(routingInformationRepository.findById("test_tenantId"))
                 .thenReturn(Optional.ofNullable(tenantRoutingInformation));
 
         TenantRoutes routingInfo =
-                routingService.getIngestionRoutingInformation("test_tenantId");
-
-        Assert.assertNull(routingInfo);
+                routingServiceImpl.getIngestionRoutingInformation("test_tenantId");
     }
 }

@@ -4,7 +4,7 @@ import com.rackspacecloud.metrics.tenantroutingservice.controllers.RoutingContro
 import com.rackspacecloud.metrics.tenantroutingservice.domain.RetentionPolicyEnum;
 import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantRoutes;
 import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationInput;
-import com.rackspacecloud.metrics.tenantroutingservice.services.RoutingService;
+import com.rackspacecloud.metrics.tenantroutingservice.services.RoutingServiceImpl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,7 +31,7 @@ public class RoutingControllerUnitTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private RoutingService routingService;
+    private RoutingServiceImpl routingServiceImpl;
 
     @InjectMocks
     RoutingController controller;
@@ -54,11 +54,10 @@ public class RoutingControllerUnitTest {
         list.add(RetentionPolicyEnum.FOUR_HOURS);
         list.add(RetentionPolicyEnum.ONE_DAY);
 
-        TenantRoutes tenantRoutingInformation = new TenantRoutes(input, list);
-        tenantRoutingInformation.setTenantId("test_tenantId");
+        TenantRoutes tenantRoutingInformation = new TenantRoutes("test_tenantId", input, list);
 
 
-        when(routingService.setIngestionRoutingInformation(anyString(), any(IngestionRoutingInformationInput.class)))
+        when(routingServiceImpl.setIngestionRoutingInformation(anyString(), any(IngestionRoutingInformationInput.class)))
                 .thenReturn(tenantRoutingInformation);
 
         TenantRoutes out = controller.setTenantRoutingInformation("test",

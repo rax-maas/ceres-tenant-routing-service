@@ -1,7 +1,5 @@
 package com.rackspacecloud.metrics.tenantroutingservice.domain;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public enum RetentionPolicyEnum {
 
     FIVE_MINUTES ("rp_10d", "10d"){
@@ -51,7 +49,7 @@ public enum RetentionPolicyEnum {
     public String databaseName;
     public String path;
 
-    private RetentionPolicyEnum(String policyName, String policy){
+    RetentionPolicyEnum(String policyName, String policy){
         retentionPolicyName = policyName;
         retentionPolicy = policy;
     }
