@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
 @RestController
 @RequestMapping("")
 public class RoutingController {
@@ -32,8 +35,8 @@ public class RoutingController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public TenantRoutes setTenantRoutingInformation(
-            @PathVariable final String tenantId,
-            @RequestBody final IngestionRoutingInformationInput routingInfo
+            @NotNull @PathVariable final String tenantId,
+            @Valid @RequestBody final IngestionRoutingInformationInput routingInfo
     ){
         LOGGER.info("setTenantRoutingInformation: Set routing request received for tenantId [{}]", tenantId);
         LOGGER.debug("Routing input is [{}]", routingInfo);
@@ -53,7 +56,7 @@ public class RoutingController {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public TenantRoutes getTenantRoutingInformation(@PathVariable final String tenantId){
+    public TenantRoutes getTenantRoutingInformation(@NotNull @PathVariable final String tenantId){
         LOGGER.info("getTenantRoutingInformation: get routing request received for tenantId [{}]", tenantId);
         return routingService.getIngestionRoutingInformation(tenantId);
     }
@@ -66,7 +69,7 @@ public class RoutingController {
             value = "/{tenantId}",
             method = RequestMethod.DELETE
     )
-    public void removeTenantRoutingInformation(@PathVariable final String tenantId){
+    public void removeTenantRoutingInformation(@NotNull @PathVariable final String tenantId){
         LOGGER.info("removeTenantRoutingInformation: delete routing request received for tenantId [{}]", tenantId);
         routingService.removeIngestionRoutingInformation(tenantId);
     }

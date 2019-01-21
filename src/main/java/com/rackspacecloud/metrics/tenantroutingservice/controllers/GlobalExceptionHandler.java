@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -16,6 +17,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalExceptionHandler {
     private static Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    /**
+     * Handle RouteNotFoundException
+     * @param e
+     * @return
+     */
     @ExceptionHandler(RouteNotFoundException.class)
     public ResponseEntity<ErrorInfo> handle(final RouteNotFoundException e) {
         LOGGER.error(e.getMessage(), e);
@@ -25,6 +31,11 @@ public class GlobalExceptionHandler {
         );
     }
 
+    /**
+     * Handle RouteConflictException
+     * @param e
+     * @return
+     */
     @ExceptionHandler(RouteConflictException.class)
     public ResponseEntity<ErrorInfo> handle(final RouteConflictException e) {
         LOGGER.error(e.getMessage(), e);
@@ -34,6 +45,11 @@ public class GlobalExceptionHandler {
         );
     }
 
+    /**
+     * Handle RouteWriteException
+     * @param e
+     * @return
+     */
     @ExceptionHandler(RouteWriteException.class)
     public ResponseEntity<ErrorInfo> handle(final RouteWriteException e) {
         LOGGER.error(e.getMessage(), e);
@@ -43,6 +59,11 @@ public class GlobalExceptionHandler {
         );
     }
 
+    /**
+     * Handle RouteDeleteException
+     * @param e
+     * @return
+     */
     @ExceptionHandler(RouteDeleteException.class)
     public ResponseEntity<ErrorInfo> handle(final RouteDeleteException e) {
         LOGGER.error(e.getMessage(), e);
@@ -52,6 +73,26 @@ public class GlobalExceptionHandler {
         );
     }
 
+    /**
+     * Handle MethodArgumentNotValidException
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorInfo> handle(MethodArgumentNotValidException e) {
+        LOGGER.error(e.getMessage(), e);
+
+        return new ResponseEntity<>(
+                new ErrorInfo(e.getMessage(), getRootCause(e).getMessage()),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    /**
+     * Handle any Exception
+     * @param e
+     * @return
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorInfo> handle(final Exception e) {
         LOGGER.error(e.getMessage(), e);
