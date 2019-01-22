@@ -75,3 +75,5 @@ Max series count (i.e. 1K, 10K, or 100K). It’s more like S, M, L (Small, Mediu
 - install Redis locally (can be found here [https://redis.io/download])
 - Run `redis-server` from the command line to start redis
 - You can access redis with `redis-cli`
+
+If you have docker installed, alternatively, you can use [`test-infrastructure`](https://github.com/racker/ceres-test-infrastructure) repository to install and run `Kafka`, `InfluxDB` and `Redis`. Please follow instruction from that repository to install them.
