@@ -2,7 +2,10 @@ package com.rackspacecloud.metrics.tenantroutingservice;
 
 import com.rackspacecloud.metrics.tenantroutingservice.domain.RetentionPolicyEnum;
 import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantRoutes;
+import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteConflictException;
+import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteDeleteException;
 import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteNotFoundException;
+import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteWriteException;
 import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationInput;
 import com.rackspacecloud.metrics.tenantroutingservice.repositories.ITenantRoutingInformationRepository;
 import com.rackspacecloud.metrics.tenantroutingservice.services.RoutingServiceImpl;
@@ -16,12 +19,12 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
@@ -39,7 +42,7 @@ public class RoutingServiceImplUnitTest {
     public void setup(){
         MockitoAnnotations.initMocks(this);
 
-        list = new LinkedList();
+        list = new ArrayList<>();
         list.add(RetentionPolicyEnum.FULL);
         list.add(RetentionPolicyEnum.FIVE_MINUTES);
         list.add(RetentionPolicyEnum.TWENTY_MINUTES);
@@ -131,5 +134,51 @@ public class RoutingServiceImplUnitTest {
 
         TenantRoutes routingInfo =
                 routingServiceImpl.getIngestionRoutingInformation("test_tenantId");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void test_removeIngestionRoutingInformation_emptyTenantId_throwsIllegalArgumentException(){
+        routingServiceImpl.removeIngestionRoutingInformation("");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void test_removeIngestionRoutingInformation_nullTenantId_throwsIllegalArgumentException(){
+        routingServiceImpl.getIngestionRoutingInformation(null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void test_removeIngestionRoutingInformation_whitespacedTenantId_throwsIllegalArgumentException(){
+        routingServiceImpl.getIngestionRoutingInformation("  ");
+    }
+
+    @Test
+    public void test_removeIngestionRoutingInformation_validTenantId_successfullyDeletesRoutes(){
+        doNothing().when(routingInformationRepository).deleteById(anyString());
+
+        routingServiceImpl.removeIngestionRoutingInformation("dummy");
+
+        // Verify that mocked method is called once and only once
+        verify(routingInformationRepository, times(1)).deleteById("dummy");
+    }
+
+    @Test(expected = RouteDeleteException.class)
+    public void test_removeIngestionRoutingInformation_exceptionFromRoutingInformationRepository_throwsRouteDeleteException(){
+        doThrow(IllegalArgumentException.class).when(routingInformationRepository).deleteById(anyString());
+
+        routingServiceImpl.removeIngestionRoutingInformation("dummy");
+    }
+
+    @Test(expected = RouteWriteException.class)
+    public void test_setIngestionRoutingInformation_exceptionFromRoutingInformationRepository_throwsRouteWriteException(){
+        doThrow(IllegalArgumentException.class).when(routingInformationRepository).save(any());
+
+        routingServiceImpl.setIngestionRoutingInformation("dummy", new IngestionRoutingInformationInput());
+    }
+
+    @Test(expected = RouteConflictException.class)
+    public void test_setIngestionRoutingInformation_existingRoutingInformation_throwsRouteConflictException(){
+        when(routingInformationRepository.findById(anyString())).thenReturn(Optional.of(new TenantRoutes()));
+        TenantRoutes routingInfo = routingServiceImpl.setIngestionRoutingInformation(
+                "test_tenantId", new IngestionRoutingInformationInput());
     }
 }
