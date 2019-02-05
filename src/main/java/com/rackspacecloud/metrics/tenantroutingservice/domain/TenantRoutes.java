@@ -2,8 +2,8 @@ package com.rackspacecloud.metrics.tenantroutingservice.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationInput;
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
@@ -41,7 +41,7 @@ public class TenantRoutes {
     }
 
     @Data
-    @AllArgsConstructor
+    @RequiredArgsConstructor
     public static class TenantRoute {
         private String path;
         private String databaseName;

@@ -15,16 +15,10 @@ management:
         include: "health,jolokia,metrics"
   metrics:
     export:
-      statsd:
-        flavor: ${statsd.flavor:telegraf}
-        host: ${statsd.host:localhost}
-        port: ${statsd.port:8125}
-        enabled: ${statsd.enabled:false}
       influx:
         db: ceres
-        host: ${statsd.host:localhost}
-        port: ${statsd.port:8086}
-        enabled: ${influx.enabled:false}
+        uri: http://localhost:8086
+        auto-create-db: true
 ---
 spring:
   profiles: production
@@ -39,13 +33,7 @@ management:
         include: "health,jolokia,metrics"
   metrics:
     export:
-      statsd:
-        flavor: ${statsd.flavor:telegraf}
-        host: ${statsd.host:localhost}
-        port: ${statsd.port:8125}
-        enabled: ${statsd.enabled:false}
       influx:
         db: ceres
-        host: ${statsd.host:localhost}
-        port: ${statsd.port:8086}
-        enabled: ${influx.enabled:false}
+        uri: ${INFLUXDB_URL}
+        auto-create-db: true
