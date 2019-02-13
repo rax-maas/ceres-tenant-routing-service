@@ -2,6 +2,15 @@ steps:
   - name: 'gcr.io/cloud-builders/mvn'
     id: DEPLOY
     args: ['-Ddocker.image.prefix=gcr.io/ceres-dev-222017', 'package', 'jib:dockerBuild']
+# Tagging the image for a more specific image can be used
+  - name: 'gcr.io/cloud-builders/docker'
+    id: TAG_IMAGE_WITH_BRANCH_NAME
+    args: ['tag', 'gcr.io/ceres-dev-222017/tenant-routing-service:latest', 'gcr.io/ceres-dev-222017/tenant-routing-service:$BRANCH_NAME']
+  - name: 'gcr.io/cloud-builders/docker'
+    id: TAG_IMAGE_WITH_SHORT_SHA
+    args: ['tag', 'gcr.io/ceres-dev-222017/tenant-routing-service:latest', 'gcr.io/ceres-dev-222017/tenant-routing-service:$SHORT_SHA']
 
 images:
   - 'gcr.io/ceres-dev-222017/tenant-routing-service'
+  - 'gcr.io/ceres-dev-222017/tenant-routing-service:$BRANCH_NAME'
+  - 'gcr.io/ceres-dev-222017/tenant-routing-service:$SHORT_SHA'
