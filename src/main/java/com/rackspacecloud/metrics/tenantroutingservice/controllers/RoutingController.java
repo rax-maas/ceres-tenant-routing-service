@@ -3,6 +3,7 @@ package com.rackspacecloud.metrics.tenantroutingservice.controllers;
 import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantRoutes;
 import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationInput;
 import com.rackspacecloud.metrics.tenantroutingservice.services.RoutingService;
+import io.micrometer.core.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ public class RoutingController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
+    @Timed(value = "tenant.routing", extraTags = {"operation","create"})
     public TenantRoutes setTenantRoutingInformation(
             @NotNull @PathVariable final String tenantId,
             @Valid @RequestBody final IngestionRoutingInformationInput routingInfo
@@ -56,6 +58,7 @@ public class RoutingController {
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
+    @Timed(value = "tenant.routing", extraTags = {"operation","read"})
     public TenantRoutes getTenantRoutingInformation(@NotNull @PathVariable final String tenantId){
         LOGGER.info("getTenantRoutingInformation: get routing request received for tenantId [{}]", tenantId);
         return routingService.getIngestionRoutingInformation(tenantId);
@@ -69,6 +72,7 @@ public class RoutingController {
             value = "/{tenantId}",
             method = RequestMethod.DELETE
     )
+    @Timed(value = "tenant.routing", extraTags = {"operation","delete"})
     public void removeTenantRoutingInformation(@NotNull @PathVariable final String tenantId){
         LOGGER.info("removeTenantRoutingInformation: delete routing request received for tenantId [{}]", tenantId);
         routingService.removeIngestionRoutingInformation(tenantId);
