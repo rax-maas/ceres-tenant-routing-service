@@ -64,8 +64,7 @@ public class RoutingServiceImplUnitTest {
                 "test_tenantId", input);
 
         Assert.assertEquals("http://test-path:8086", routingInfo.getRoutes().get("full").getPath());
-        Assert.assertEquals("test_tenantId", routingInfo.getTenantId());
-        Assert.assertEquals(10000, routingInfo.getRoutes().get("full").getMaxSeriesCount());
+        Assert.assertEquals("test_tenantId", routingInfo.getTenantIdAndMeasurement());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -105,24 +104,24 @@ public class RoutingServiceImplUnitTest {
                 .thenReturn(Optional.ofNullable(routes));
 
         TenantRoutes routingInfo =
-                routingServiceImpl.getIngestionRoutingInformation("test_tenantId");
+                routingServiceImpl.getIngestionRoutingInformation("test_tenantId", "test");
 
             Assert.assertEquals("http://test-path:8086", routingInfo.getRoutes().get("full").getPath());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void test_getIngestionRoutingInformation_emptyTenantId_throwsIllegalArgumentException(){
-        Assert.assertNull(routingServiceImpl.getIngestionRoutingInformation(""));
+        Assert.assertNull(routingServiceImpl.getIngestionRoutingInformation("", ""));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void test_getIngestionRoutingInformation_nullTenantId_throwsIllegalArgumentException(){
-        Assert.assertNull(routingServiceImpl.getIngestionRoutingInformation(null));
+        Assert.assertNull(routingServiceImpl.getIngestionRoutingInformation(null, null));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void test_getIngestionRoutingInformation_whitespacedTenantId_throwsIllegalArgumentException(){
-        Assert.assertNull(routingServiceImpl.getIngestionRoutingInformation("  "));
+        Assert.assertNull(routingServiceImpl.getIngestionRoutingInformation("  ", "  "));
     }
 
     @Test(expected = RouteNotFoundException.class)
@@ -133,7 +132,7 @@ public class RoutingServiceImplUnitTest {
                 .thenReturn(Optional.ofNullable(tenantRoutingInformation));
 
         TenantRoutes routingInfo =
-                routingServiceImpl.getIngestionRoutingInformation("test_tenantId");
+                routingServiceImpl.getIngestionRoutingInformation("test_tenantId", "test");
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -143,12 +142,12 @@ public class RoutingServiceImplUnitTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void test_removeIngestionRoutingInformation_nullTenantId_throwsIllegalArgumentException(){
-        routingServiceImpl.getIngestionRoutingInformation(null);
+        routingServiceImpl.getIngestionRoutingInformation(null, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void test_removeIngestionRoutingInformation_whitespacedTenantId_throwsIllegalArgumentException(){
-        routingServiceImpl.getIngestionRoutingInformation("  ");
+        routingServiceImpl.getIngestionRoutingInformation("  ", "  ");
     }
 
     @Test

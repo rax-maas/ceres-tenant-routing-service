@@ -15,9 +15,10 @@ public interface RoutingService {
     /**
      * Get Ingestion Routing Information for given tenantId
      * @param tenantId
+     * @param measurement
      * @return
      */
-    TenantRoutes getIngestionRoutingInformation(String tenantId);
+    TenantRoutes getIngestionRoutingInformation(String tenantId, String measurement);
 
     /**
      * Remove Ingestion Routing Information for given tenantId

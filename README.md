@@ -24,7 +24,7 @@ Max series count (i.e. 1K, 10K, or 100K). It’s more like S, M, L (Small, Mediu
 ### Example for routing metadata
 ```
 {
-	"tenantId": "hybrid:12345",
+	"tenantIdAndMeasurement": "hybrid:12345",
 	"routes" : {
 		"full" : {
 			"path": "http://data-influxdb:8086",
@@ -80,7 +80,7 @@ If you have docker installed, alternatively, you can use [`test-infrastructure`]
 
 ## API
 1. Add tenant routing information
-   - URL - http://localhost:8080/{tenantId}
+   - URL - http://localhost:8080/{tenantIdAndMeasurement}
    - RequestMethod: `POST`
    - Request payload example:
    ```
@@ -90,8 +90,8 @@ If you have docker installed, alternatively, you can use [`test-infrastructure`]
    }
    ```
 2. Find tenant routing information
-   - URL - http://localhost:8080/{tenantId}
+   - URL - http://localhost:8080/{tenantIdAndMeasurement}
    - RequestMethod: `GET`
 3. Delete tenant routing information
-   - URL - http://localhost:8080/{tenantId}
+   - URL - http://localhost:8080/{tenantIdAndMeasurement}
    - RequestMethod: `DELETE`

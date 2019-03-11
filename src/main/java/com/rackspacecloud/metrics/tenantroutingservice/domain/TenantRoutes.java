@@ -15,7 +15,7 @@ import java.util.Map;
 @Data
 public class TenantRoutes {
     @Id
-    private String tenantId;
+    private String tenantIdAndMeasurement;
     @JsonProperty("routes")
     private Map<String, TenantRoute> routes;
 
@@ -23,17 +23,17 @@ public class TenantRoutes {
         routes = new HashMap<>();
     }
 
-    private void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
+    private void setTenantIdAndMeasurement(String tenantIdAndMeasurement) {
+        this.tenantIdAndMeasurement = tenantIdAndMeasurement;
     }
 
     public TenantRoutes(
-            String tenantId,
+            String tenantIdAndMeasurement,
             IngestionRoutingInformationInput input,
             List<RetentionPolicyEnum> defaultRoutes) {
 
         this();
-        this.setTenantId(tenantId);
+        this.setTenantIdAndMeasurement(tenantIdAndMeasurement);
         for(RetentionPolicyEnum value : defaultRoutes) {
             value.setDatabaseName(input.getDatabaseName()).setPath(input.getPath());
             routes.put(value.toString(), new TenantRoute(value));
@@ -47,12 +47,10 @@ public class TenantRoutes {
         private String databaseName;
         private String retentionPolicyName;
         private String retentionPolicy;
-        private int maxSeriesCount;
 
         public TenantRoute(RetentionPolicyEnum enumeration) {
             retentionPolicyName = enumeration.retentionPolicyName;
             retentionPolicy = enumeration.retentionPolicy;
-            maxSeriesCount = enumeration.maxSeriesCount;
             if(enumeration.databaseName != null) {
                 databaseName = enumeration.databaseName;
             }

@@ -90,9 +90,9 @@ public class RoutingControllerUnitTest {
     public void test_getTenantRoutingInformation_validInput_returnsTenantRoutes(){
         TenantRoutes output = getTenantRoutes();
 
-        when(routingServiceImpl.getIngestionRoutingInformation(anyString())).thenReturn(output);
+        when(routingServiceImpl.getIngestionRoutingInformation(anyString(), anyString())).thenReturn(output);
 
-        TenantRoutes out = controller.getTenantRoutingInformation(anyString());
+        TenantRoutes out = controller.getTenantRoutingInformation(anyString(), anyString());
 
         Assert.assertEquals("http://test-path:8086", out.getRoutes().get("full").getPath());
     }
@@ -110,13 +110,15 @@ public class RoutingControllerUnitTest {
 
     @Test(expected = RouteNotFoundException.class)
     public void test_getTenantRoutingInformation_nonExistingTenant_throwsRouteNotFoundException(){
-        doThrow(RouteNotFoundException.class).when(routingServiceImpl).getIngestionRoutingInformation(anyString());
-        TenantRoutes out = controller.getTenantRoutingInformation(anyString());
+        doThrow(RouteNotFoundException.class)
+                .when(routingServiceImpl).getIngestionRoutingInformation(anyString(), anyString());
+        TenantRoutes out = controller.getTenantRoutingInformation(anyString(), anyString());
     }
 
     @Test
     public void test_GlobalExceptionHandler_getMethod_nonExistingTenant_throwsRouteNotFoundException() throws Exception {
-        doThrow(RouteNotFoundException.class).when(routingServiceImpl).getIngestionRoutingInformation(anyString());
+        doThrow(RouteNotFoundException.class)
+                .when(routingServiceImpl).getIngestionRoutingInformation(anyString(), anyString());
 
         this.mockMvc.perform(get("/dummy").accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isNotFound())

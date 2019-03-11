@@ -36,6 +36,7 @@ public class RoutingController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     @Timed(value = "tenant.routing", extraTags = {"operation","create"})
+    @Deprecated
     public TenantRoutes setTenantRoutingInformation(
             @NotNull @PathVariable final String tenantId,
             @Valid @RequestBody final IngestionRoutingInformationInput routingInfo
@@ -49,19 +50,23 @@ public class RoutingController {
     }
 
     /**
-     * Will return the routes for the given tenantId
+     * Will return the routes for the given tenantId and measurement
      * @param tenantId
+     * @param measurement
      * @return
      */
     @RequestMapping(
-            value = "/{tenantId}",
+            value = "/{tenantId}/{measurement}",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     @Timed(value = "tenant.routing", extraTags = {"operation","read"})
-    public TenantRoutes getTenantRoutingInformation(@NotNull @PathVariable final String tenantId){
-        LOGGER.info("getTenantRoutingInformation: get routing request received for tenantId [{}]", tenantId);
-        return routingService.getIngestionRoutingInformation(tenantId);
+    public TenantRoutes getTenantRoutingInformation(
+            @NotNull @PathVariable final String tenantId,
+            @NotNull @PathVariable final String measurement){
+        LOGGER.info("getTenantRoutingInformation: get routing request received for tenantId [{}]" +
+                " and measurement [{}]", tenantId, measurement);
+        return routingService.getIngestionRoutingInformation(tenantId, measurement);
     }
 
     /**
@@ -73,6 +78,7 @@ public class RoutingController {
             method = RequestMethod.DELETE
     )
     @Timed(value = "tenant.routing", extraTags = {"operation","delete"})
+    @Deprecated
     public void removeTenantRoutingInformation(@NotNull @PathVariable final String tenantId){
         LOGGER.info("removeTenantRoutingInformation: delete routing request received for tenantId [{}]", tenantId);
         routingService.removeIngestionRoutingInformation(tenantId);
