@@ -137,6 +137,10 @@ public class RoutingServiceImpl implements RoutingService {
     }
 
     public String getMinSeriesCountInfluxDBInstance() {
+        //TODO: Remove this and create a better solution. This is just a temp work
+        if(influxDBScalerUrl.equalsIgnoreCase("SCALER_DEV_URL"))
+            return "http://localhost:8087";
+
         String baseUrl = String.format("%s/min-series-count-url", influxDBScalerUrl);
 
         // Get all of the stats for given InfluxDB instance
