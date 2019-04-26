@@ -1,54 +1,41 @@
 package com.rackspacecloud.metrics.tenantroutingservice.services;
 
-import com.rackspacecloud.metrics.tenantroutingservice.domain.MaxAndMinSeriesInstances;
 import com.rackspacecloud.metrics.tenantroutingservice.domain.RetentionPolicyEnum;
+import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantMeasurements;
 import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantRoutes;
-import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteConflictException;
-import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteDeleteException;
-import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteNotFoundException;
+import com.rackspacecloud.metrics.tenantroutingservice.exceptions.MeasurementNotFoundException;
 import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteWriteException;
 import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationInput;
+import com.rackspacecloud.metrics.tenantroutingservice.repositories.ITenantMeasurementRepository;
 import com.rackspacecloud.metrics.tenantroutingservice.repositories.ITenantRoutingInformationRepository;
-import com.rackspacecloud.metrics.tenantroutingservice.repositories.MaxMinInstancesRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-@Service
 public class RoutingServiceImpl implements RoutingService {
+    private RestTemplate restTemplate;
+    private ITenantRoutingInformationRepository routingInformationRepository;
+    private ITenantMeasurementRepository tenantMeasurementsRepository;
+    private String influxDBScalerUrl;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(RoutingServiceImpl.class);
 
-    @Autowired
-    ITenantRoutingInformationRepository routingInformationRepository;
-
-    @Autowired
-    MaxMinInstancesRepository maxMinInstancesRepository;
-
-    @Override
-    public TenantRoutes setIngestionRoutingInformation(String tenantId, IngestionRoutingInformationInput tenantInfo) {
-        if(StringUtils.isEmpty(tenantId) || StringUtils.isEmpty(tenantId.trim()))
-            throw new IllegalArgumentException("'tenantId' is null, empty or contains all whitespaces.");
-
-        if(tenantInfo == null) throw new IllegalArgumentException("'tenantInfo' is null.");
-
-        Optional<TenantRoutes> oRoutingInformation = routingInformationRepository.findById(tenantId);
-
-        if(oRoutingInformation.isPresent()) throw new RouteConflictException(tenantId);
-
-        TenantRoutes routingInformation = new TenantRoutes(tenantId, tenantInfo, createListOfDefaultRoutes());
-
-        try {
-            return routingInformationRepository.save(routingInformation);
-        }
-        catch (Exception e) {
-            throw new RouteWriteException(routingInformation.toString(), e);
-        }
+    public RoutingServiceImpl(RestTemplate restTemplate,
+                              ITenantRoutingInformationRepository routingInformationRepository,
+                              String influxDBScalerUrl,
+                              ITenantMeasurementRepository tenantMeasurementsRepository
+                              ) {
+        this.restTemplate = restTemplate;
+        this.routingInformationRepository = routingInformationRepository;
+        this.influxDBScalerUrl = influxDBScalerUrl;
+        this.tenantMeasurementsRepository = tenantMeasurementsRepository;
     }
 
     @Override
@@ -67,10 +54,7 @@ public class RoutingServiceImpl implements RoutingService {
         if(!routingInfo.isPresent()) {
             LOGGER.info("Route not found for tenantId [{}] and measurement [{}]", tenantId, measurement);
 
-            Optional<MaxAndMinSeriesInstances> maxAndMinSeriesInstances = maxMinInstancesRepository.findById("MIN");
-            if(!maxAndMinSeriesInstances.isPresent()) throw new RouteNotFoundException(tenantIdAndMeasurement);
-
-            String influxDBUrl = maxAndMinSeriesInstances.get().getUrl();
+            String influxDBUrl = getMinSeriesCountInfluxDBInstance();
 
             IngestionRoutingInformationInput ingestionRoutesInfo = new IngestionRoutingInformationInput();
             ingestionRoutesInfo.setPath(influxDBUrl);
@@ -79,6 +63,8 @@ public class RoutingServiceImpl implements RoutingService {
             TenantRoutes routingInformation =
                     new TenantRoutes(tenantIdAndMeasurement, ingestionRoutesInfo, createListOfDefaultRoutes());
             try {
+                addTenantMeasurement(tenantId, measurement);
+
                 LOGGER.info("Creating route for tenantId [{}] and measurement [{}] with routing information: [{}]",
                         tenantId, measurement, routingInformation.toString());
                 return routingInformationRepository.save(routingInformation);
@@ -92,6 +78,25 @@ public class RoutingServiceImpl implements RoutingService {
         return routingInfo.get();
     }
 
+    private void addTenantMeasurement(String tenantId, String measurement) {
+        Optional tenantMeasurementsOptional = tenantMeasurementsRepository.findById(tenantId);
+        TenantMeasurements tenantMeasurements;
+
+        if(tenantMeasurementsOptional.isPresent()) {
+            tenantMeasurements = (TenantMeasurements) tenantMeasurementsOptional.get();
+            tenantMeasurements.getMeasurements().add(measurement);
+        }
+        else {
+            tenantMeasurements = new TenantMeasurements();
+            tenantMeasurements.setTenantId(tenantId);
+            Set<String> measurements = new HashSet<>();
+            measurements.add(measurement);
+            tenantMeasurements.setMeasurements(measurements);
+        }
+
+        tenantMeasurementsRepository.save(tenantMeasurements);
+    }
+
     private String createDatabaseName(String tenantId, String measurement) {
         int numberOfBuckets = 10;
         int hashCodeSum = tenantId.hashCode() + measurement.hashCode();
@@ -101,16 +106,22 @@ public class RoutingServiceImpl implements RoutingService {
     }
 
     @Override
-    public void removeIngestionRoutingInformation(String tenantId) {
+    public Collection<String> getMeasurements(String tenantId) {
         if(StringUtils.isEmpty(tenantId) || StringUtils.isEmpty(tenantId.trim()))
             throw new IllegalArgumentException("'tenantId' is null, empty or contains all whitespaces.");
 
         try {
-            routingInformationRepository.deleteById(tenantId);
+            Optional tenantMeasurementsOptional = tenantMeasurementsRepository.findById(tenantId);
+            if(tenantMeasurementsOptional.isPresent()) {
+                TenantMeasurements tenantMeasurements = (TenantMeasurements) tenantMeasurementsOptional.get();
+                return tenantMeasurements.getMeasurements();
+            }
         }
         catch (Exception e) {
-            throw new RouteDeleteException(tenantId, e);
+            throw new MeasurementNotFoundException(tenantId, e);
         }
+
+        return new HashSet<>();
     }
 
     private List<RetentionPolicyEnum> createListOfDefaultRoutes(){
@@ -123,5 +134,31 @@ public class RoutingServiceImpl implements RoutingService {
         list.add(RetentionPolicyEnum.ONE_DAY);
 
         return list;
+    }
+
+    public String getMinSeriesCountInfluxDBInstance() {
+        String baseUrl = String.format("%s/min-series-count-url", influxDBScalerUrl);
+
+        // Get all of the stats for given InfluxDB instance
+        ResponseEntity<String> response = getResponseEntity(baseUrl);
+
+        return response.getBody();
+    }
+
+
+    private ResponseEntity<String> getResponseEntity(String baseUrl) {
+        ResponseEntity<String> response = null;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        String url = baseUrl;
+        try {
+            response = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
+        }
+        catch(Exception ex){
+            LOGGER.error("restTemplate.exchange threw exception with message: {}", ex.getMessage());
+        }
+        return response;
     }
 }

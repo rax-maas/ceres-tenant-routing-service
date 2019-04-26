@@ -1,7 +1,7 @@
 package com.rackspacecloud.metrics.tenantroutingservice.controllers;
 
 import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteConflictException;
-import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteDeleteException;
+import com.rackspacecloud.metrics.tenantroutingservice.exceptions.MeasurementNotFoundException;
 import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteNotFoundException;
 import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteWriteException;
 import com.rackspacecloud.metrics.tenantroutingservice.model.ErrorInfo;
@@ -64,8 +64,8 @@ public class GlobalExceptionHandler {
      * @param e
      * @return
      */
-    @ExceptionHandler(RouteDeleteException.class)
-    public ResponseEntity<ErrorInfo> handle(final RouteDeleteException e) {
+    @ExceptionHandler(MeasurementNotFoundException.class)
+    public ResponseEntity<ErrorInfo> handle(final MeasurementNotFoundException e) {
         LOGGER.error(e.getMessage(), e);
         return new ResponseEntity<>(
                 new ErrorInfo(e.getMessage(), getRootCause(e).getMessage()),

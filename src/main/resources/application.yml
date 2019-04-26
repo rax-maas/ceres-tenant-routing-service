@@ -1,6 +1,10 @@
 redis:
   hostname: localhost
   port: 6379
+
+spring:
+  application:
+    name: ceres-routing-service
 ---
 spring:
   profiles: development
@@ -10,12 +14,27 @@ server.port: 8081
 redis:
   hostname: localhost
   port: 6379
+
+influxdb.scaler.url: http://localhost:8083
+
+rest-template:
+  request-config:
+    connection-request-timeout: 120000  # timeout when requesting a connection from the connection manager
+    connect-timeout: 120000             # timeout until a connection is established
+    socket-timeout: 120000              # timeout for waiting for data
+
+  pooling-http-client-connection-manager:
+    max-total: 5 # Max number of connection to pool
+
 management:
   endpoints:
     web:
       exposure:
         include: "health,jolokia,metrics"
   metrics:
+    tags:
+      stack: "dev"
+      service: "routing-service"
     export:
       influx:
         db: ceres
@@ -28,12 +47,27 @@ spring:
 redis:
   hostname: ${REDIS_HOSTNAME}
   port: ${REDIS_PORT}
+
+influxdb.scaler.url: ${INFLUXDB_SCALER_URL}
+
+rest-template:
+  request-config:
+    connection-request-timeout: 120000  # timeout when requesting a connection from the connection manager
+    connect-timeout: 120000             # timeout until a connection is established
+    socket-timeout: 120000              # timeout for waiting for data
+
+  pooling-http-client-connection-manager:
+    max-total: 5 # Max number of connection to pool
+
 management:
   endpoints:
     web:
       exposure:
         include: "health,jolokia,metrics"
   metrics:
+    tags:
+      stack: "prod"
+      service: "routing-service"
     export:
       influx:
         db: ceres
