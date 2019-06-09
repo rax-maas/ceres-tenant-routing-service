@@ -10,16 +10,13 @@ import com.rackspacecloud.metrics.tenantroutingservice.repositories.ITenantMeasu
 import com.rackspacecloud.metrics.tenantroutingservice.repositories.ITenantRoutingInformationRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 
 public class RoutingServiceImpl implements RoutingService {
+    private static final String DefaultInfluxDBScalerUrl = "http://localhost:8087";
     private RestTemplate restTemplate;
     private ITenantRoutingInformationRepository routingInformationRepository;
     private ITenantMeasurementRepository tenantMeasurementsRepository;
@@ -72,7 +69,6 @@ public class RoutingServiceImpl implements RoutingService {
             catch (Exception e) {
                 throw new RouteWriteException(routingInformation.toString(), e);
             }
-
         }
 
         return routingInfo.get();
@@ -137,32 +133,8 @@ public class RoutingServiceImpl implements RoutingService {
     }
 
     public String getMinSeriesCountInfluxDBInstance() {
-        //TODO: Remove this and create a better solution. This is just a temp work
-        if(influxDBScalerUrl.equalsIgnoreCase("SCALER_DEV_URL"))
-            return "http://localhost:8087";
+        if(StringUtils.isEmpty(influxDBScalerUrl)) return DefaultInfluxDBScalerUrl;
 
-        String baseUrl = String.format("%s/min-series-count-url", influxDBScalerUrl);
-
-        // Get all of the stats for given InfluxDB instance
-        ResponseEntity<String> response = getResponseEntity(baseUrl);
-
-        return response.getBody();
-    }
-
-
-    private ResponseEntity<String> getResponseEntity(String baseUrl) {
-        ResponseEntity<String> response = null;
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-        String url = baseUrl;
-        try {
-            response = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
-        }
-        catch(Exception ex){
-            LOGGER.error("restTemplate.exchange threw exception with message: {}", ex.getMessage());
-        }
-        return response;
+        return restTemplate.getForObject(String.format("%s/min-series-count-url", influxDBScalerUrl), String.class);
     }
 }

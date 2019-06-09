@@ -1,8 +1,6 @@
 package com.rackspacecloud.metrics.tenantroutingservice.controllers;
 
-import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteConflictException;
 import com.rackspacecloud.metrics.tenantroutingservice.exceptions.MeasurementNotFoundException;
-import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteNotFoundException;
 import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteWriteException;
 import com.rackspacecloud.metrics.tenantroutingservice.model.ErrorInfo;
 import org.slf4j.Logger;
@@ -16,34 +14,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalExceptionHandler {
     private static Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
-
-    /**
-     * Handle RouteNotFoundException
-     * @param e
-     * @return
-     */
-    @ExceptionHandler(RouteNotFoundException.class)
-    public ResponseEntity<ErrorInfo> handle(final RouteNotFoundException e) {
-        LOGGER.error(e.getMessage(), e);
-        return new ResponseEntity<>(
-                new ErrorInfo(e.getMessage(), getRootCause(e).getMessage()),
-                HttpStatus.NOT_FOUND
-        );
-    }
-
-    /**
-     * Handle RouteConflictException
-     * @param e
-     * @return
-     */
-    @ExceptionHandler(RouteConflictException.class)
-    public ResponseEntity<ErrorInfo> handle(final RouteConflictException e) {
-        LOGGER.error(e.getMessage(), e);
-        return new ResponseEntity<>(
-                new ErrorInfo(e.getMessage(), getRootCause(e).getMessage()),
-                HttpStatus.CONFLICT
-        );
-    }
 
     /**
      * Handle RouteWriteException
