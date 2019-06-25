@@ -15,7 +15,7 @@ redis:
   hostname: localhost
   port: 6379
 
-influxdb.scaler.url: "SCALER_DEV_URL"
+influxdb.scaler.url: http://localhost:8083
 
 rest-template:
   request-config:

@@ -95,7 +95,7 @@ public class RoutingServiceImpl implements RoutingService {
 
     private String createDatabaseName(String tenantId, String measurement) {
         int numberOfBuckets = 10;
-        int hashCodeSum = tenantId.hashCode() + measurement.hashCode();
+        int hashCodeSum = tenantId.hashCode() ^ measurement.hashCode(); // XOR operation to avoid any overflow
         int bucketIndex = Math.abs(hashCodeSum) % numberOfBuckets;
 
         return "db_" + bucketIndex;
