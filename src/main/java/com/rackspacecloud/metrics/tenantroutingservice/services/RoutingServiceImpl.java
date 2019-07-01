@@ -1,71 +1,123 @@
 package com.rackspacecloud.metrics.tenantroutingservice.services;
 
 import com.rackspacecloud.metrics.tenantroutingservice.domain.RetentionPolicyEnum;
+import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantMeasurements;
 import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantRoutes;
-import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteConflictException;
-import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteDeleteException;
-import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteNotFoundException;
+import com.rackspacecloud.metrics.tenantroutingservice.exceptions.MeasurementNotFoundException;
 import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteWriteException;
 import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationInput;
+import com.rackspacecloud.metrics.tenantroutingservice.repositories.ITenantMeasurementRepository;
 import com.rackspacecloud.metrics.tenantroutingservice.repositories.ITenantRoutingInformationRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-@Service
 public class RoutingServiceImpl implements RoutingService {
-    @Autowired
-    ITenantRoutingInformationRepository routingInformationRepository;
+    private static final String DefaultInfluxDBScalerUrl = "http://localhost:8087";
+    private RestTemplate restTemplate;
+    private ITenantRoutingInformationRepository routingInformationRepository;
+    private ITenantMeasurementRepository tenantMeasurementsRepository;
+    private String influxDBScalerUrl;
 
-    @Override
-    public TenantRoutes setIngestionRoutingInformation(String tenantId, IngestionRoutingInformationInput tenantInfo) {
-        if(StringUtils.isEmpty(tenantId) || StringUtils.isEmpty(tenantId.trim()))
-            throw new IllegalArgumentException("'tenantId' is null, empty or contains all whitespaces.");
+    private static final Logger LOGGER = LoggerFactory.getLogger(RoutingServiceImpl.class);
 
-        if(tenantInfo == null) throw new IllegalArgumentException("'tenantInfo' is null.");
-
-        Optional<TenantRoutes> oRoutingInformation = routingInformationRepository.findById(tenantId);
-
-        if(oRoutingInformation.isPresent()) throw new RouteConflictException(tenantId);
-
-        TenantRoutes routingInformation = new TenantRoutes(tenantId, tenantInfo, createListOfDefaultRoutes());
-
-        try {
-            return routingInformationRepository.save(routingInformation);
-        }
-        catch (Exception e) {
-            throw new RouteWriteException(routingInformation.toString(), e);
-        }
+    public RoutingServiceImpl(RestTemplate restTemplate,
+                              ITenantRoutingInformationRepository routingInformationRepository,
+                              String influxDBScalerUrl,
+                              ITenantMeasurementRepository tenantMeasurementsRepository
+                              ) {
+        this.restTemplate = restTemplate;
+        this.routingInformationRepository = routingInformationRepository;
+        this.influxDBScalerUrl = influxDBScalerUrl;
+        this.tenantMeasurementsRepository = tenantMeasurementsRepository;
     }
 
     @Override
-    public TenantRoutes getIngestionRoutingInformation(String tenantId) {
+    public TenantRoutes getIngestionRoutingInformation(String tenantId, String measurement) {
 
         if(StringUtils.isEmpty(tenantId) || StringUtils.isEmpty(tenantId.trim()))
             throw new IllegalArgumentException("'tenantId' is null, empty or contains all whitespaces.");
 
-        Optional<TenantRoutes> routingInfo = routingInformationRepository.findById(tenantId);
+        if(StringUtils.isEmpty(measurement) || StringUtils.isEmpty(measurement.trim()))
+            throw new IllegalArgumentException("'measurement' is null, empty or contains all whitespaces.");
 
-        if(!routingInfo.isPresent()) throw new RouteNotFoundException(tenantId);
+        String tenantIdAndMeasurement = String.format("%s:%s", tenantId, measurement);
+
+        Optional<TenantRoutes> routingInfo = routingInformationRepository.findById(tenantIdAndMeasurement);
+
+        if(!routingInfo.isPresent()) {
+            LOGGER.info("Route not found for tenantId [{}] and measurement [{}]", tenantId, measurement);
+
+            String influxDBUrl = getMinSeriesCountInfluxDBInstance();
+
+            IngestionRoutingInformationInput ingestionRoutesInfo = new IngestionRoutingInformationInput();
+            ingestionRoutesInfo.setPath(influxDBUrl);
+            ingestionRoutesInfo.setDatabaseName(createDatabaseName(tenantId, measurement));
+
+            TenantRoutes routingInformation =
+                    new TenantRoutes(tenantIdAndMeasurement, ingestionRoutesInfo, createListOfDefaultRoutes());
+            try {
+                addTenantMeasurement(tenantId, measurement);
+
+                LOGGER.info("Creating route for tenantId [{}] and measurement [{}] with routing information: [{}]",
+                        tenantId, measurement, routingInformation.toString());
+                return routingInformationRepository.save(routingInformation);
+            }
+            catch (Exception e) {
+                throw new RouteWriteException(routingInformation.toString(), e);
+            }
+        }
 
         return routingInfo.get();
     }
 
+    private void addTenantMeasurement(String tenantId, String measurement) {
+        Optional tenantMeasurementsOptional = tenantMeasurementsRepository.findById(tenantId);
+        TenantMeasurements tenantMeasurements;
+
+        if(tenantMeasurementsOptional.isPresent()) {
+            tenantMeasurements = (TenantMeasurements) tenantMeasurementsOptional.get();
+            tenantMeasurements.getMeasurements().add(measurement);
+        }
+        else {
+            tenantMeasurements = new TenantMeasurements();
+            tenantMeasurements.setTenantId(tenantId);
+            Set<String> measurements = new HashSet<>();
+            measurements.add(measurement);
+            tenantMeasurements.setMeasurements(measurements);
+        }
+
+        tenantMeasurementsRepository.save(tenantMeasurements);
+    }
+
+    private String createDatabaseName(String tenantId, String measurement) {
+        int numberOfBuckets = 10;
+        int hashCodeSum = tenantId.hashCode() ^ measurement.hashCode(); // XOR operation to avoid any overflow
+        int bucketIndex = Math.abs(hashCodeSum) % numberOfBuckets;
+
+        return "db_" + bucketIndex;
+    }
+
     @Override
-    public void removeIngestionRoutingInformation(String tenantId) {
+    public Collection<String> getMeasurements(String tenantId) {
         if(StringUtils.isEmpty(tenantId) || StringUtils.isEmpty(tenantId.trim()))
             throw new IllegalArgumentException("'tenantId' is null, empty or contains all whitespaces.");
 
         try {
-            routingInformationRepository.deleteById(tenantId);
+            Optional tenantMeasurementsOptional = tenantMeasurementsRepository.findById(tenantId);
+            if(tenantMeasurementsOptional.isPresent()) {
+                TenantMeasurements tenantMeasurements = (TenantMeasurements) tenantMeasurementsOptional.get();
+                return tenantMeasurements.getMeasurements();
+            }
         }
         catch (Exception e) {
-            throw new RouteDeleteException(tenantId, e);
+            throw new MeasurementNotFoundException(tenantId, e);
         }
+
+        return new HashSet<>();
     }
 
     private List<RetentionPolicyEnum> createListOfDefaultRoutes(){
@@ -78,5 +130,11 @@ public class RoutingServiceImpl implements RoutingService {
         list.add(RetentionPolicyEnum.ONE_DAY);
 
         return list;
+    }
+
+    public String getMinSeriesCountInfluxDBInstance() {
+        if(StringUtils.isEmpty(influxDBScalerUrl)) return DefaultInfluxDBScalerUrl;
+
+        return restTemplate.getForObject(String.format("%s/min-series-count-url", influxDBScalerUrl), String.class);
     }
 }

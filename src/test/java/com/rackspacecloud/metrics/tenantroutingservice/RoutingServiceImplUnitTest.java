@@ -1,12 +1,11 @@
 package com.rackspacecloud.metrics.tenantroutingservice;
 
 import com.rackspacecloud.metrics.tenantroutingservice.domain.RetentionPolicyEnum;
+import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantMeasurements;
 import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantRoutes;
-import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteConflictException;
-import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteDeleteException;
-import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteNotFoundException;
-import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteWriteException;
+import com.rackspacecloud.metrics.tenantroutingservice.exceptions.MeasurementNotFoundException;
 import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationInput;
+import com.rackspacecloud.metrics.tenantroutingservice.repositories.ITenantMeasurementRepository;
 import com.rackspacecloud.metrics.tenantroutingservice.repositories.ITenantRoutingInformationRepository;
 import com.rackspacecloud.metrics.tenantroutingservice.services.RoutingServiceImpl;
 import org.junit.Assert;
@@ -15,15 +14,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -32,6 +29,9 @@ public class RoutingServiceImplUnitTest {
 
     @Mock
     private ITenantRoutingInformationRepository routingInformationRepository;
+
+    @Mock
+    private ITenantMeasurementRepository tenantMeasurementRepository;
 
     @InjectMocks
     private RoutingServiceImpl routingServiceImpl;
@@ -52,133 +52,143 @@ public class RoutingServiceImplUnitTest {
     }
 
     @Test
-    public void test_setIngestionRoutingInformation_validInput_returnsTenantRoutingInformation(){
-        IngestionRoutingInformationInput input = new IngestionRoutingInformationInput();
-        input.setDatabaseName("test_tenantId");
-        input.setPath("http://test-path:8086");
-        TenantRoutes tenantRoutes = new TenantRoutes("test_tenantId", input, list);
-        when(routingInformationRepository.save(any(TenantRoutes.class)))
-                .thenReturn(tenantRoutes);
-
-        TenantRoutes routingInfo = routingServiceImpl.setIngestionRoutingInformation(
-                "test_tenantId", input);
-
-        Assert.assertEquals("http://test-path:8086", routingInfo.getRoutes().get("full").getPath());
-        Assert.assertEquals("test_tenantId", routingInfo.getTenantId());
-        Assert.assertEquals(10000, routingInfo.getRoutes().get("full").getMaxSeriesCount());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void test_setIngestionRoutingInformation_emptyTenantId_throwsIllegalArgumentException(){
-        Assert.assertNull(routingServiceImpl.setIngestionRoutingInformation(
-                "", new IngestionRoutingInformationInput()));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void test_setIngestionRoutingInformation_nullTenantId_throwsIllegalArgumentException(){
-        Assert.assertNull(routingServiceImpl.setIngestionRoutingInformation(
-                null, new IngestionRoutingInformationInput()));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void test_setIngestionRoutingInformation_whitespacedTenantId_throwsIllegalArgumentException(){
-        Assert.assertNull(routingServiceImpl.setIngestionRoutingInformation(
-                "  ", new IngestionRoutingInformationInput()));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void test_setIngestionRoutingInformation_nullTenantInfo_throwsIllegalArgumentException(){
-        IngestionRoutingInformationInput input  = null;
-        Assert.assertNull(routingServiceImpl.setIngestionRoutingInformation("test", input));
-    }
-
-    @Test
-    public void test_getIngestionRoutingInformation_validInput_returnsIngestionRoutingInformationOutput(){
+    public void test_getIngestionRoutingInformation_forExistingRoute_validInput_returnsIngestionRoutingInformationOutput() {
         IngestionRoutingInformationInput input = new IngestionRoutingInformationInput();
         input.setDatabaseName("test_tenantId");
         input.setPath("http://test-path:8086");
 
         TenantRoutes routes = new TenantRoutes("test_tenantId", input, list);
 
+        RoutingServiceImpl routingServiceImplLocal = new RoutingServiceImpl(null,
+                routingInformationRepository, null, null);
 
-        when(routingInformationRepository.findById("test_tenantId"))
-                .thenReturn(Optional.ofNullable(routes));
+        when(routingInformationRepository.findById("test_tenantId:test")).thenReturn(Optional.ofNullable(routes));
 
         TenantRoutes routingInfo =
-                routingServiceImpl.getIngestionRoutingInformation("test_tenantId");
+                routingServiceImplLocal.getIngestionRoutingInformation("test_tenantId", "test");
 
             Assert.assertEquals("http://test-path:8086", routingInfo.getRoutes().get("full").getPath());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void test_getIngestionRoutingInformation_emptyTenantId_throwsIllegalArgumentException(){
-        Assert.assertNull(routingServiceImpl.getIngestionRoutingInformation(""));
-    }
+    /**
+     * This test case is for scenario:
+     * 1. No routing information is present for the tenantId+Measurement
+     * 2. TenantId is present in tenant-measurement table, but we are getting a new measurement for existing tenantId
+     */
+    @Test
+    public void test_getIngestionRoutingInformation_forNonExistingRouteAndExistingTenant_validInput_returnsRoutingInformationOutput() {
+        IngestionRoutingInformationInput input = new IngestionRoutingInformationInput();
+        input.setDatabaseName("test_tenantId");
+        input.setPath("http://test-path:8086");
 
-    @Test(expected = IllegalArgumentException.class)
-    public void test_getIngestionRoutingInformation_nullTenantId_throwsIllegalArgumentException(){
-        Assert.assertNull(routingServiceImpl.getIngestionRoutingInformation(null));
-    }
+        TenantMeasurements tenantMeasurements = new TenantMeasurements();
+        tenantMeasurements.setTenantId("test_tenantId");
+        tenantMeasurements.setMeasurements(new HashSet<>());
 
-    @Test(expected = IllegalArgumentException.class)
-    public void test_getIngestionRoutingInformation_whitespacedTenantId_throwsIllegalArgumentException(){
-        Assert.assertNull(routingServiceImpl.getIngestionRoutingInformation("  "));
-    }
+        RoutingServiceImpl routingServiceImplLocal = new RoutingServiceImpl(null,
+                routingInformationRepository,
+                "", tenantMeasurementRepository);
 
-    @Test(expected = RouteNotFoundException.class)
-    public void test_getIngestionRoutingInformation_wrongTenantId_throwsRouteNotFoundException(){
-        TenantRoutes tenantRoutingInformation = null;
+        when(routingInformationRepository.findById("test_tenantId:test")).thenReturn(Optional.ofNullable(null));
 
-        when(routingInformationRepository.findById("test_tenantId"))
-                .thenReturn(Optional.ofNullable(tenantRoutingInformation));
+        when(tenantMeasurementRepository.findById("test_tenantId")).thenReturn(Optional.ofNullable(tenantMeasurements));
 
         TenantRoutes routingInfo =
-                routingServiceImpl.getIngestionRoutingInformation("test_tenantId");
+                routingServiceImplLocal.getIngestionRoutingInformation("test_tenantId", "test");
+
+        verify(routingInformationRepository, Mockito.times(1))
+                .save(any(TenantRoutes.class));
+        verify(tenantMeasurementRepository, Mockito.times(1))
+                .save(any(TenantMeasurements.class));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void test_removeIngestionRoutingInformation_emptyTenantId_throwsIllegalArgumentException(){
-        routingServiceImpl.removeIngestionRoutingInformation("");
-    }
+    /**
+     * This test case is for scenario:
+     * 1. No routing information is present for the tenantId+Measurement
+     * 2. Also TenantId is new to the system, so there is no record for this tenantId in tenant-measurement table
+     */
+    @Test
+    public void test_getIngestionRoutingInformation_forNonExistingRouteAndNewTenant_validInput_returnsRoutingInformationOutput() {
+        IngestionRoutingInformationInput input = new IngestionRoutingInformationInput();
+        input.setDatabaseName("test_tenantId");
+        input.setPath("http://test-path:8086");
 
-    @Test(expected = IllegalArgumentException.class)
-    public void test_removeIngestionRoutingInformation_nullTenantId_throwsIllegalArgumentException(){
-        routingServiceImpl.getIngestionRoutingInformation(null);
-    }
+        RoutingServiceImpl routingServiceImplLocal = new RoutingServiceImpl(null,
+                routingInformationRepository,
+                null, tenantMeasurementRepository);
 
-    @Test(expected = IllegalArgumentException.class)
-    public void test_removeIngestionRoutingInformation_whitespacedTenantId_throwsIllegalArgumentException(){
-        routingServiceImpl.getIngestionRoutingInformation("  ");
+        when(routingInformationRepository.findById("test_tenantId:test")).thenReturn(Optional.ofNullable(null));
+
+        when(tenantMeasurementRepository.findById("test_tenantId")).thenReturn(Optional.ofNullable(null));
+
+        TenantRoutes routingInfo =
+                routingServiceImplLocal.getIngestionRoutingInformation("test_tenantId", "test");
+
+        verify(routingInformationRepository, Mockito.times(1))
+                .save(any(TenantRoutes.class));
+        verify(tenantMeasurementRepository, Mockito.times(1))
+                .save(any(TenantMeasurements.class));
     }
 
     @Test
-    public void test_removeIngestionRoutingInformation_validTenantId_successfullyDeletesRoutes(){
-        doNothing().when(routingInformationRepository).deleteById(anyString());
+    public void test_getMeasurements_existingTenantId_successfullyListAllMeasurements(){
+        TenantMeasurements tenantMeasurements = new TenantMeasurements();
+        tenantMeasurements.setTenantId("test_tenantId");
 
-        routingServiceImpl.removeIngestionRoutingInformation("dummy");
+        Set<String> measurements = new HashSet<>();
+        measurements.add("measurement1");
+        measurements.add("measurement2");
+        tenantMeasurements.setMeasurements(measurements);
 
-        // Verify that mocked method is called once and only once
-        verify(routingInformationRepository, times(1)).deleteById("dummy");
+        when(tenantMeasurementRepository.findById("test_tenantId")).thenReturn(Optional.ofNullable(tenantMeasurements));
+
+
+        Collection<String> measurementCollection = routingServiceImpl.getMeasurements("test_tenantId");
+
+        Assert.assertEquals(measurements.size(), measurementCollection.size());
+        Assert.assertTrue(measurementCollection.contains("measurement1"));
+        Assert.assertTrue(measurementCollection.contains("measurement2"));
     }
 
-    @Test(expected = RouteDeleteException.class)
-    public void test_removeIngestionRoutingInformation_exceptionFromRoutingInformationRepository_throwsRouteDeleteException(){
-        doThrow(IllegalArgumentException.class).when(routingInformationRepository).deleteById(anyString());
-
-        routingServiceImpl.removeIngestionRoutingInformation("dummy");
+    @Test(expected = MeasurementNotFoundException.class)
+    public void test_getMeasurements_RepositoryThrowsException_throwsMeasurementNotFoundException(){
+        when(tenantMeasurementRepository.findById("test_tenantId"))
+                .thenThrow(new MeasurementNotFoundException("test_tenantId", null));
+        routingServiceImpl.getMeasurements("test_tenantId");
     }
 
-    @Test(expected = RouteWriteException.class)
-    public void test_setIngestionRoutingInformation_exceptionFromRoutingInformationRepository_throwsRouteWriteException(){
-        doThrow(IllegalArgumentException.class).when(routingInformationRepository).save(any());
-
-        routingServiceImpl.setIngestionRoutingInformation("dummy", new IngestionRoutingInformationInput());
+    @Test(expected = IllegalArgumentException.class)
+    public void test_getIngestionRoutingInformation_emptyTenantId_throwsIllegalArgumentException() throws Exception {
+        Assert.assertNull(routingServiceImpl.getIngestionRoutingInformation("", ""));
     }
 
-    @Test(expected = RouteConflictException.class)
-    public void test_setIngestionRoutingInformation_existingRoutingInformation_throwsRouteConflictException(){
-        when(routingInformationRepository.findById(anyString())).thenReturn(Optional.of(new TenantRoutes()));
-        TenantRoutes routingInfo = routingServiceImpl.setIngestionRoutingInformation(
-                "test_tenantId", new IngestionRoutingInformationInput());
+    @Test(expected = IllegalArgumentException.class)
+    public void test_getIngestionRoutingInformation_nullTenantId_throwsIllegalArgumentException() throws Exception {
+        Assert.assertNull(routingServiceImpl.getIngestionRoutingInformation(null, null));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void test_getIngestionRoutingInformation_whitespacedTenantId_throwsIllegalArgumentException() throws Exception {
+        Assert.assertNull(routingServiceImpl.getIngestionRoutingInformation("  ", "  "));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void test_getMeasurements_emptyTenantId_throwsIllegalArgumentException(){
+        routingServiceImpl.getMeasurements("");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void test_getMeasurements_allWhiteSpacedTenantId_throwsIllegalArgumentException(){
+        routingServiceImpl.getMeasurements("     ");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void test_removeIngestionRoutingInformation_nullTenantId_throwsIllegalArgumentException() throws Exception {
+        routingServiceImpl.getIngestionRoutingInformation(null, null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void test_removeIngestionRoutingInformation_whitespacedTenantId_throwsIllegalArgumentException() throws Exception {
+        routingServiceImpl.getIngestionRoutingInformation("  ", "  ");
     }
 }
