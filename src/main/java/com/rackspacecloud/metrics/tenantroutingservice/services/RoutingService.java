@@ -13,7 +13,7 @@ public interface RoutingService {
      * @param measurement
      * @return
      */
-    TenantRoutes getIngestionRoutingInformation(String tenantId, String measurement) throws Exception;
+    TenantRoutes getIngestionRoutingInformation(String tenantId, String measurement, boolean readOnly) throws Exception;
 
     /**
      * Get measurements for given tenantId

@@ -72,9 +72,9 @@ public class RoutingControllerUnitTest {
     public void test_getTenantRoutingInformation_validInput_returnsTenantRoutes() throws Exception {
         TenantRoutes output = getTenantRoutes();
 
-        when(routingServiceImpl.getIngestionRoutingInformation(anyString(), anyString())).thenReturn(output);
+        when(routingServiceImpl.getIngestionRoutingInformation(anyString(), anyString(), false)).thenReturn(output);
 
-        TenantRoutes out = controller.getTenantRoutingInformation(anyString(), anyString());
+        TenantRoutes out = controller.getTenantRoutingInformation(anyString(), anyString(), false);
 
         Assert.assertEquals("http://test-path:8086", out.getRoutes().get("full").getPath());
     }
@@ -82,7 +82,7 @@ public class RoutingControllerUnitTest {
     @Test
     public void test_GlobalExceptionHandler_postMethod_newTenant_throwsRouteWriteException() throws Exception {
         doThrow(RouteWriteException.class).when(routingServiceImpl)
-                .getIngestionRoutingInformation(anyString(), anyString());
+                .getIngestionRoutingInformation(anyString(), anyString(), false);
 
         IngestionRoutingInformationInput input = new IngestionRoutingInformationInput();
         input.setDatabaseName("test_database");

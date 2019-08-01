@@ -7,10 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
@@ -32,15 +29,18 @@ public class RoutingController {
     @RequestMapping(
             value = "/{tenantId}/{measurement}",
             method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            params = "readOnly"
+
     )
     @Timed(value = "tenant.routing", extraTags = {"operation","get"})
     public TenantRoutes getTenantRoutingInformation(
             @NotNull @PathVariable final String tenantId,
-            @NotNull @PathVariable final String measurement) throws Exception {
+            @NotNull @PathVariable final String measurement,
+            @RequestParam(value = "readOnly",  required = false, defaultValue = "false") boolean readOnly) throws Exception {
         LOGGER.debug("getTenantRoutingInformation: get routing request received for tenantId [{}]" +
                 " and measurement [{}]", tenantId, measurement);
-        return routingService.getIngestionRoutingInformation(tenantId, measurement);
+        return routingService.getIngestionRoutingInformation(tenantId, measurement, readOnly);
     }
 
     /**
