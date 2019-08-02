@@ -4,6 +4,7 @@ import com.rackspacecloud.metrics.tenantroutingservice.domain.RetentionPolicyEnu
 import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantMeasurements;
 import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantRoutes;
 import com.rackspacecloud.metrics.tenantroutingservice.exceptions.MeasurementNotFoundException;
+import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteNotFoundException;
 import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationInput;
 import com.rackspacecloud.metrics.tenantroutingservice.repositories.ITenantMeasurementRepository;
 import com.rackspacecloud.metrics.tenantroutingservice.repositories.ITenantRoutingInformationRepository;
@@ -190,5 +191,10 @@ public class RoutingServiceImplUnitTest {
     @Test(expected = IllegalArgumentException.class)
     public void test_removeIngestionRoutingInformation_whitespacedTenantId_throwsIllegalArgumentException() throws Exception {
         routingServiceImpl.getIngestionRoutingInformation("  ", "  ", false);
+    }
+
+    @Test(expected = RouteNotFoundException.class)
+    public void test_notFoundRoute_throwsRouteNotFoundException() throws Exception {
+        routingServiceImpl.getIngestionRoutingInformation("123", "doesNotExist", true);
     }
 }
