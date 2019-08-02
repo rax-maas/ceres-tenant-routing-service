@@ -194,7 +194,26 @@ public class RoutingServiceImplUnitTest {
     }
 
     @Test(expected = RouteNotFoundException.class)
-    public void test_notFoundRoute_throwsRouteNotFoundException() throws Exception {
+    public void test_readOnly_notFoundRoute_throwsRouteNotFoundException() throws Exception {
         routingServiceImpl.getIngestionRoutingInformation("123", "doesNotExist", true);
+    }
+
+    @Test
+    public void test_readOnly_getIngestionRoutingInformation_forExistingRoute_validInput_returnsIngestionRoutingInformationOutput() {
+        IngestionRoutingInformationInput input = new IngestionRoutingInformationInput();
+        input.setDatabaseName("test_tenantId");
+        input.setPath("http://test-path:8086");
+
+        TenantRoutes routes = new TenantRoutes("test_tenantId", input, list);
+
+        RoutingServiceImpl routingServiceImplLocal = new RoutingServiceImpl(null,
+                routingInformationRepository, null, null);
+
+        when(routingInformationRepository.findById("test_tenantId:test")).thenReturn(Optional.ofNullable(routes));
+
+        TenantRoutes routingInfo =
+                routingServiceImplLocal.getIngestionRoutingInformation("test_tenantId", "test", true);
+
+        Assert.assertEquals("http://test-path:8086", routingInfo.getRoutes().get("full").getPath());
     }
 }
