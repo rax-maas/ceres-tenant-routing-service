@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -72,9 +73,9 @@ public class RoutingControllerUnitTest {
     public void test_getTenantRoutingInformation_validInput_returnsTenantRoutes() throws Exception {
         TenantRoutes output = getTenantRoutes();
 
-        when(routingServiceImpl.getIngestionRoutingInformation(anyString(), anyString(), false)).thenReturn(output);
+        when(routingServiceImpl.getIngestionRoutingInformation(anyString(), anyString(), anyBoolean())).thenReturn(output);
 
-        TenantRoutes out = controller.getTenantRoutingInformation(anyString(), anyString(), false);
+        TenantRoutes out = controller.getTenantRoutingInformation(anyString(), anyString(), anyBoolean());
 
         Assert.assertEquals("http://test-path:8086", out.getRoutes().get("full").getPath());
     }
@@ -82,7 +83,7 @@ public class RoutingControllerUnitTest {
     @Test
     public void test_GlobalExceptionHandler_postMethod_newTenant_throwsRouteWriteException() throws Exception {
         doThrow(RouteWriteException.class).when(routingServiceImpl)
-                .getIngestionRoutingInformation(anyString(), anyString(), false);
+                .getIngestionRoutingInformation(anyString(), anyString(), anyBoolean());
 
         IngestionRoutingInformationInput input = new IngestionRoutingInformationInput();
         input.setDatabaseName("test_database");
@@ -90,7 +91,7 @@ public class RoutingControllerUnitTest {
 
         ObjectMapper mapper = new ObjectMapper();
 
-        this.mockMvc.perform(get("/dummy_tenantId/measurement")
+        this.mockMvc.perform(get("/dummy_tenantId/measurement?readOnly=true")
                 .content(mapper.writeValueAsString(input)))
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().string("{\"message\":null,\"rootCause\":null}"));
