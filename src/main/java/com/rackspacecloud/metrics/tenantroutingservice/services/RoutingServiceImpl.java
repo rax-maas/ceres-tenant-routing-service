@@ -4,6 +4,7 @@ import com.rackspacecloud.metrics.tenantroutingservice.domain.RetentionPolicyEnu
 import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantMeasurements;
 import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantRoutes;
 import com.rackspacecloud.metrics.tenantroutingservice.exceptions.MeasurementNotFoundException;
+import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteNotFoundException;
 import com.rackspacecloud.metrics.tenantroutingservice.exceptions.RouteWriteException;
 import com.rackspacecloud.metrics.tenantroutingservice.model.IngestionRoutingInformationInput;
 import com.rackspacecloud.metrics.tenantroutingservice.repositories.ITenantMeasurementRepository;
@@ -36,7 +37,7 @@ public class RoutingServiceImpl implements RoutingService {
     }
 
     @Override
-    public TenantRoutes getIngestionRoutingInformation(String tenantId, String measurement) {
+    public TenantRoutes getIngestionRoutingInformation(String tenantId, String measurement, boolean readOnly) {
 
         if(StringUtils.isEmpty(tenantId) || StringUtils.isEmpty(tenantId.trim()))
             throw new IllegalArgumentException("'tenantId' is null, empty or contains all whitespaces.");
@@ -49,6 +50,13 @@ public class RoutingServiceImpl implements RoutingService {
         Optional<TenantRoutes> routingInfo = routingInformationRepository.findById(tenantIdAndMeasurement);
 
         if(!routingInfo.isPresent()) {
+            if(readOnly) {
+                LOGGER.info("Could not look up route for tenantId [{}] and measurement [{}]", tenantId, measurement);
+                throw new RouteNotFoundException(
+                        String.format("Not Found\nRoutingInfo:%s\nTenantID:%s\nMeasurement:%s",
+                                routingInfo.toString(),tenantId, measurement));
+            }
+
             LOGGER.info("Route not found for tenantId [{}] and measurement [{}]", tenantId, measurement);
 
             String influxDBUrl = getMinSeriesCountInfluxDBInstance();
