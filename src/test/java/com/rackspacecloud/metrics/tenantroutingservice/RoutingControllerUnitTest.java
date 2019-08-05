@@ -24,8 +24,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -95,5 +94,16 @@ public class RoutingControllerUnitTest {
                 .content(mapper.writeValueAsString(input)))
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().string("{\"message\":null,\"rootCause\":null}"));
+    }
+
+    @Test
+    public void test_postMethod_newTenant_defaultValue() throws Exception {
+        TenantRoutes output = getTenantRoutes();
+
+        when(routingServiceImpl.getIngestionRoutingInformation(anyString(), anyString(), eq(false))).thenReturn(output);
+
+        TenantRoutes out = controller.getTenantRoutingInformation(anyString(), anyString(), eq(false));
+
+        Assert.assertEquals("http://test-path:8086", out.getRoutes().get("full").getPath());
     }
 }

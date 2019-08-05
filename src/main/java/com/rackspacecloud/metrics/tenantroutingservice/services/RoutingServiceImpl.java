@@ -49,12 +49,14 @@ public class RoutingServiceImpl implements RoutingService {
 
         Optional<TenantRoutes> routingInfo = routingInformationRepository.findById(tenantIdAndMeasurement);
 
-        if(!routingInfo.isPresent() && readOnly) {
-            LOGGER.info("Could not look up route for tenantId [{}] and measurement [{}]", tenantId, measurement);
-            throw new RouteNotFoundException(routingInfo.toString());
-        }
-
         if(!routingInfo.isPresent()) {
+            if(readOnly) {
+                LOGGER.info("Could not look up route for tenantId [{}] and measurement [{}]", tenantId, measurement);
+                throw new RouteNotFoundException(
+                        String.format("Not Found\nRoutingInfo:%s\nTenantID:%s\nMeasurement:%s",
+                                routingInfo.toString(),tenantId, measurement));
+            }
+
             LOGGER.info("Route not found for tenantId [{}] and measurement [{}]", tenantId, measurement);
 
             String influxDBUrl = getMinSeriesCountInfluxDBInstance();
