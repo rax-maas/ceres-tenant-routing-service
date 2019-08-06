@@ -24,10 +24,12 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -105,5 +107,11 @@ public class RoutingControllerUnitTest {
         TenantRoutes out = controller.getTenantRoutingInformation(anyString(), anyString(), eq(false));
 
         Assert.assertEquals("http://test-path:8086", out.getRoutes().get("full").getPath());
+    }
+
+    @Test
+    public void shouldUseDefaultValue() throws Exception {
+        this.mockMvc.perform(get("/123/test")).andDo(print()).andExpect(status().isOk())
+                .andExpect(content().string(containsString("")));
     }
 }

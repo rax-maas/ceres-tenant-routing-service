@@ -29,15 +29,13 @@ public class RoutingController {
     @RequestMapping(
             value = "/{tenantId}/{measurement}",
             method = RequestMethod.GET,
-            produces = MediaType.APPLICATION_JSON_VALUE,
-            params = "readOnly"
-
+            produces = MediaType.APPLICATION_JSON_VALUE
     )
     @Timed(value = "tenant.routing", extraTags = {"operation","get"})
     public TenantRoutes getTenantRoutingInformation(
             @NotNull @PathVariable final String tenantId,
             @NotNull @PathVariable final String measurement,
-            @RequestParam(value = "readOnly",  required = false, defaultValue = "false") boolean readOnly) throws Exception {
+            @RequestParam(value = "readOnly", required = false, defaultValue = "false") boolean readOnly) throws Exception {
         LOGGER.debug("getTenantRoutingInformation: get routing request received for tenantId [{}]" +
                 " and measurement [{}]", tenantId, measurement);
         return routingService.getIngestionRoutingInformation(tenantId, measurement, readOnly);
