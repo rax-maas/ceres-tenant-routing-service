@@ -19,6 +19,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 
@@ -35,7 +36,9 @@ public class RoutingServiceImplUnitTest {
     private ITenantMeasurementRepository tenantMeasurementRepository;
 
     @InjectMocks
-    private RoutingServiceImpl routingServiceImpl;
+    private RoutingServiceImpl routingServiceImpl = new RoutingServiceImpl(new RestTemplate(),
+            routingInformationRepository,
+            "", "", false, tenantMeasurementRepository);
 
     private List<RetentionPolicyEnum> list;
 
@@ -61,7 +64,8 @@ public class RoutingServiceImplUnitTest {
         TenantRoutes routes = new TenantRoutes("test_tenantId", input, list);
 
         RoutingServiceImpl routingServiceImplLocal = new RoutingServiceImpl(null,
-                routingInformationRepository, null, null);
+                routingInformationRepository, null,
+                null, false, null);
 
         when(routingInformationRepository.findById("test_tenantId:test")).thenReturn(Optional.ofNullable(routes));
 
@@ -88,7 +92,7 @@ public class RoutingServiceImplUnitTest {
 
         RoutingServiceImpl routingServiceImplLocal = new RoutingServiceImpl(null,
                 routingInformationRepository,
-                "", tenantMeasurementRepository);
+                "", null, false, tenantMeasurementRepository);
 
         when(routingInformationRepository.findById("test_tenantId:test")).thenReturn(Optional.ofNullable(null));
 
@@ -116,7 +120,7 @@ public class RoutingServiceImplUnitTest {
 
         RoutingServiceImpl routingServiceImplLocal = new RoutingServiceImpl(null,
                 routingInformationRepository,
-                null, tenantMeasurementRepository);
+                null, null, false, tenantMeasurementRepository);
 
         when(routingInformationRepository.findById("test_tenantId:test")).thenReturn(Optional.ofNullable(null));
 
@@ -207,7 +211,8 @@ public class RoutingServiceImplUnitTest {
         TenantRoutes routes = new TenantRoutes("test_tenantId", input, list);
 
         RoutingServiceImpl routingServiceImplLocal = new RoutingServiceImpl(null,
-                routingInformationRepository, null, null);
+                routingInformationRepository, null,
+                null, false, null);
 
         when(routingInformationRepository.findById("test_tenantId:test")).thenReturn(Optional.ofNullable(routes));
 
