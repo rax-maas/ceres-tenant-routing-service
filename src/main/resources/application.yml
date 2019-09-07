@@ -5,6 +5,9 @@ redis:
 spring:
   application:
     name: ceres-routing-service
+
+influxdb.enterprise.url: http://localhost:8086
+is.using.influxdb.enterprise: true
 ---
 spring:
   profiles: development
@@ -16,6 +19,7 @@ redis:
   port: 6379
 
 influxdb.scaler.url: http://localhost:8083
+influxdb.enterprise.url: http://localhost:8086
 
 rest-template:
   request-config:
@@ -49,6 +53,8 @@ redis:
   port: ${REDIS_PORT}
 
 influxdb.scaler.url: ${INFLUXDB_SCALER_URL}
+influxdb.enterprise.url: ${INFLUXDB_ENTERPRISE_URL}
+is.using.influxdb.enterprise: ${IS_USING_INFLUXDB_ENTERPRISE}
 
 rest-template:
   request-config:

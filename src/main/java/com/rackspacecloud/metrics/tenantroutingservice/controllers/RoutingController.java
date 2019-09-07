@@ -3,8 +3,7 @@ package com.rackspacecloud.metrics.tenantroutingservice.controllers;
 import com.rackspacecloud.metrics.tenantroutingservice.domain.TenantRoutes;
 import com.rackspacecloud.metrics.tenantroutingservice.services.RoutingService;
 import io.micrometer.core.annotation.Timed;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -14,8 +13,8 @@ import java.util.Collection;
 
 @RestController
 @RequestMapping("")
+@Slf4j
 public class RoutingController {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RoutingController.class);
 
     @Autowired
     private RoutingService routingService;
@@ -36,7 +35,7 @@ public class RoutingController {
             @NotNull @PathVariable final String tenantId,
             @NotNull @PathVariable final String measurement,
             @RequestParam(value = "readOnly", required = false, defaultValue = "false") boolean readOnly) throws Exception {
-        LOGGER.debug("getTenantRoutingInformation: get routing request received for tenantId [{}]" +
+        log.debug("getTenantRoutingInformation: get routing request received for tenantId [{}]" +
                 " and measurement [{}]", tenantId, measurement);
         return routingService.getIngestionRoutingInformation(tenantId, measurement, readOnly);
     }
@@ -51,7 +50,7 @@ public class RoutingController {
     )
     @Timed(value = "tenant.routing", extraTags = {"operation","get"})
     public Collection<String> getMeasurements(@NotNull @PathVariable final String tenantId){
-        LOGGER.info("getMeasurements: get measurements request received for tenantId [{}]", tenantId);
+        log.info("getMeasurements: get measurements request received for tenantId [{}]", tenantId);
         return routingService.getMeasurements(tenantId);
     }
 }
