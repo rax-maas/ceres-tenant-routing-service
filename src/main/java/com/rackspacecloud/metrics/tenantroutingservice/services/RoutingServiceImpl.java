@@ -18,7 +18,7 @@ import java.util.*;
 
 @Slf4j
 public class RoutingServiceImpl implements RoutingService {
-    private static final int NUMBER_OF_DATABASES_IN_INFLUXDB_INSTANCE = 10;
+    private int numberOfDatabasesInInfluxDBInstance;
     private static final String DefaultInfluxDBScalerUrl = "http://localhost:8087";
     private RestTemplate restTemplate;
     private ITenantRoutingInformationRepository routingInformationRepository;
@@ -32,8 +32,10 @@ public class RoutingServiceImpl implements RoutingService {
                               String influxDBScalerUrl,
                               String influxDBEnterpriseUrl,
                               boolean isUsingInfluxdbEnterprise,
-                              ITenantMeasurementRepository tenantMeasurementsRepository
+                              ITenantMeasurementRepository tenantMeasurementsRepository,
+                              int numberOfDatabasesInInfluxDBInstance
                               ) {
+        this.numberOfDatabasesInInfluxDBInstance = numberOfDatabasesInInfluxDBInstance;
         this.restTemplate = restTemplate;
         this.routingInformationRepository = routingInformationRepository;
         this.influxDBScalerUrl = influxDBScalerUrl;
@@ -137,7 +139,7 @@ public class RoutingServiceImpl implements RoutingService {
     }
 
     private String createDatabaseName(String tenantId, String measurement) {
-        int numberOfBuckets = NUMBER_OF_DATABASES_IN_INFLUXDB_INSTANCE;
+        int numberOfBuckets = numberOfDatabasesInInfluxDBInstance;
         int hashCodeSum = tenantId.hashCode() ^ measurement.hashCode(); // XOR operation to avoid any overflow
         int bucketIndex = Math.abs(hashCodeSum) % numberOfBuckets;
 

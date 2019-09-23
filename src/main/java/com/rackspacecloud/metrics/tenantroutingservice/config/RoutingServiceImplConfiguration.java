@@ -34,6 +34,9 @@ public class RoutingServiceImplConfiguration {
     @Value("${influxdb.enterprise.url}")
     private String influxdbEnterpriseUrl;
 
+    @Value("${number.of.databases.in.influxdb.instance}")
+    private int numberOfDatabasesInInfluxDBInstance;
+
     @Autowired
     RestTemplateConfigurationProperties config;
 
@@ -106,6 +109,7 @@ public class RoutingServiceImplConfiguration {
         }
 
         return new RoutingServiceImpl(restTemplate, routingInformationRepository,
-                influxDBScalerUrl, influxdbEnterpriseUrl, isUsingInfluxdbEnterprise, tenantMeasurementsRepository);
+                influxDBScalerUrl, influxdbEnterpriseUrl, isUsingInfluxdbEnterprise,
+                tenantMeasurementsRepository, numberOfDatabasesInInfluxDBInstance);
     }
 }
