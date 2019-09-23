@@ -38,7 +38,8 @@ public class RoutingServiceImplUnitTest {
     @InjectMocks
     private RoutingServiceImpl routingServiceImpl = new RoutingServiceImpl(new RestTemplate(),
             routingInformationRepository,
-            "", "", false, tenantMeasurementRepository);
+            "", "", false,
+            tenantMeasurementRepository, 10);
 
     private List<RetentionPolicyEnum> list;
 
@@ -65,7 +66,8 @@ public class RoutingServiceImplUnitTest {
 
         RoutingServiceImpl routingServiceImplLocal = new RoutingServiceImpl(null,
                 routingInformationRepository, null,
-                null, false, null);
+                null, false,
+                null, 10);
 
         when(routingInformationRepository.findById("test_tenantId:test")).thenReturn(Optional.ofNullable(routes));
 
@@ -92,7 +94,8 @@ public class RoutingServiceImplUnitTest {
 
         RoutingServiceImpl routingServiceImplLocal = new RoutingServiceImpl(null,
                 routingInformationRepository,
-                "", null, false, tenantMeasurementRepository);
+                "", null, false,
+                tenantMeasurementRepository, 10);
 
         when(routingInformationRepository.findById("test_tenantId:test")).thenReturn(Optional.ofNullable(null));
 
@@ -120,7 +123,8 @@ public class RoutingServiceImplUnitTest {
 
         RoutingServiceImpl routingServiceImplLocal = new RoutingServiceImpl(null,
                 routingInformationRepository,
-                null, null, false, tenantMeasurementRepository);
+                null, null, false,
+                tenantMeasurementRepository, 10);
 
         when(routingInformationRepository.findById("test_tenantId:test")).thenReturn(Optional.ofNullable(null));
 
@@ -212,7 +216,8 @@ public class RoutingServiceImplUnitTest {
 
         RoutingServiceImpl routingServiceImplLocal = new RoutingServiceImpl(null,
                 routingInformationRepository, null,
-                null, false, null);
+                null, false,
+                null, 10);
 
         when(routingInformationRepository.findById("test_tenantId:test")).thenReturn(Optional.ofNullable(routes));
 

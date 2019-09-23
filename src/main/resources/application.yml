@@ -8,6 +8,7 @@ spring:
 
 influxdb.enterprise.url: http://localhost:8086
 is.using.influxdb.enterprise: true
+number.of.databases.in.influxdb.instance: 10
 ---
 spring:
   profiles: development
@@ -55,6 +56,7 @@ redis:
 influxdb.scaler.url: ${INFLUXDB_SCALER_URL}
 influxdb.enterprise.url: ${INFLUXDB_ENTERPRISE_URL}
 is.using.influxdb.enterprise: ${IS_USING_INFLUXDB_ENTERPRISE}
+number.of.databases.in.influxdb.instance: ${NUMBER_OF_DATABASES_IN_INFLUXDB_INSTANCE}
 
 rest-template:
   request-config:
