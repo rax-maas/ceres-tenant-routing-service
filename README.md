@@ -1,74 +1,62 @@
 # Tenant Routing Service
 ## Responsibilities
-- Tenant white-listing. Any tenant data that's not here in the list will error out into the log, so that we know if we are trying to push unexpected tenant data into InfluxDB.
-- Capacity tracking for tenants. This will assist into our decision to see which InfluxDB instance particular tenant will go to. And in case of (which will very well happen) we see that a given tenant needs more series, we might have to update their location accordingly.
-- In future, we can add "admin" UI on top of this service to add/update tenant routing or capacity related metadata.
-- Tenant series count. This will assist in capacity planning or tenant data relocation.
+- Creates routes for given tenantId and measurement.
+- Provides routes for given tenantId and measurement.
+- Provides all of the measurements for a given tenantId.
 
-## Requirements
-- Prepopulate Redis datastore with tenant routing metadata
-- Get routing metadata
+It uses `Redis` database to store all of the route information.
 
 ## Routing Metadata
 Routing metadata should contain following items:
-1. Tenant Id
+1. Tenant Id and measurement
 1. Rollup window
 1. InfluxDB instance path
 1. Database name
 1. Retention policy name
 1. Retention policy
-1. Projected Max series count for the given tenant <br /> <br />
-Max series count (i.e. 1K, 10K, or 100K). It’s more like S, M, L (Small, Medium, Large) <br />
-**NOTE:** Right now, we are going with only two buckets (>=100K and <100K)
 
 ### Example for routing metadata
 ```
 {
-	"tenantIdAndMeasurement": "hybrid:12345",
-	"routes" : {
-		"full" : {
-			"path": "http://data-influxdb:8086",
-			"databaseName": "db_hybrid_12345",
-			"retentionPolicyName": "rp_5d",
-			"retentionPolicy": "5d",
-			"maxSeriesCount": 100000
-		},
-		"5m" : {
-			"path": "http://data-influxdb:8086",
-			"databaseName": "db_hybrid_12345",
-			"retentionPolicyName": "rp_10d",
-			"retentionPolicy": "10d",
-			"maxSeriesCount": 100000
-		},
-		"20m" : {
-			"path": "http://data-influxdb:8086",
-			"databaseName": "db_hybrid_12345",
-			"retentionPolicyName": "rp_20d",
-			"retentionPolicy": "20d",
-			"maxSeriesCount": 100000
-		},
-		"60m" : {
-			"path": "http://data-influxdb:8086",
-			"databaseName": "db_hybrid_12345",
-			"retentionPolicyName": "rp_155d",
-			"retentionPolicy": "155d",
-			"maxSeriesCount": 100000
-		},
-		"240m" : {
-			"path": "http://data-influxdb:8086",
-			"databaseName": "db_hybrid_12345",
-			"retentionPolicyName": "rp_300d",
-			"retentionPolicy": "300d",
-			"maxSeriesCount": 100000
-		},
-		"1440m" : {
-			"path": "http://data-influxdb:8086",
-			"databaseName": "db_hybrid_12345",
-			"retentionPolicyName": "rp_1825d",
-			"retentionPolicy": "1825d",
-			"maxSeriesCount": 100000
-		}
-	}
+  "tenantIdAndMeasurement": "tenant_id_1:cpu",
+  "routes": {
+    "60m": {
+      "path": "http://localhost:8086",
+      "databaseName": "db_2",
+      "retentionPolicyName": "rp_155d",
+      "retentionPolicy": "155d"
+    },
+    "1440m": {
+      "path": "http://localhost:8086",
+      "databaseName": "db_2",
+      "retentionPolicyName": "rp_1825d",
+      "retentionPolicy": "1825d"
+    },
+    "5m": {
+      "path": "http://localhost:8086",
+      "databaseName": "db_2",
+      "retentionPolicyName": "rp_10d",
+      "retentionPolicy": "10d"
+    },
+    "240m": {
+      "path": "http://localhost:8086",
+      "databaseName": "db_2",
+      "retentionPolicyName": "rp_300d",
+      "retentionPolicy": "300d"
+    },
+    "full": {
+      "path": "http://localhost:8086",
+      "databaseName": "db_2",
+      "retentionPolicyName": "rp_5d",
+      "retentionPolicy": "5d"
+    },
+    "20m": {
+      "path": "http://localhost:8086",
+      "databaseName": "db_2",
+      "retentionPolicyName": "rp_20d",
+      "retentionPolicy": "20d"
+    }
+  }
 }
 ```
 ## Setup
@@ -79,19 +67,15 @@ Max series count (i.e. 1K, 10K, or 100K). It’s more like S, M, L (Small, Mediu
 If you have docker installed, alternatively, you can use [`test-infrastructure`](https://github.com/racker/ceres-test-infrastructure) repository to install and run `Kafka`, `InfluxDB` and `Redis`. Please follow instruction from that repository to install them.
 
 ## API
-1. Add tenant routing information
-   - URL - http://localhost:8080/{tenantIdAndMeasurement}
-   - RequestMethod: `POST`
-   - Request payload example:
-   ```
-   {
-	"path": "http://localhost:8086",
-	"databaseName": "db_tenantId"
-   }
-   ```
-2. Find tenant routing information
-   - URL - http://localhost:8080/{tenantIdAndMeasurement}
+1. Add routing information - This endpoint provides the routing information. If routing information does not exist, it will create routing information and provides that information back to the caller.
+   - URL - http://localhost:8080/{tenantId}/{measurement}
    - RequestMethod: `GET`
-3. Delete tenant routing information
-   - URL - http://localhost:8080/{tenantIdAndMeasurement}
-   - RequestMethod: `DELETE`
+   - Request example: `http://localhost:8081/tenant_id_1/cpu`
+2. Query only routing information - This endpoint only allows query operation for the given tenantId and measurement. It doesn't create new routes if tenantId and measurement combination is new to the system.
+   - URL - http://localhost:8080/{tenantId}/{measurement}/?readOnly=true
+   - RequestMethod: `GET`
+   - Request example: `http://localhost:8081/tenant_id_3/cpu?readOnly=true`
+3. Get all of the measurements for given tenantId
+   - URL - http://localhost:8080/{tenantId}/measurements
+   - RequestMethod: `GET`
+   - Request example: `http://localhost:8081/tenant_id_1/measurements`
