@@ -68,14 +68,14 @@ If you have docker installed, alternatively, you can use [`test-infrastructure`]
 
 ## API
 1. Add routing information - This endpoint provides the routing information. If routing information does not exist, it will create routing information and provides that information back to the caller.
-   - URL - http://localhost:8080/{tenantId}/{measurement}
+   - URL - `http://localhost:8080/{tenantId}/{measurement}`
    - RequestMethod: `GET`
    - Request example: `http://localhost:8081/tenant_id_1/cpu`
 2. Query only routing information - This endpoint only allows query operation for the given tenantId and measurement. It doesn't create new routes if tenantId and measurement combination is new to the system.
-   - URL - http://localhost:8080/{tenantId}/{measurement}/?readOnly=true
+   - URL - `http://localhost:8080/{tenantId}/{measurement}/?readOnly=true`
    - RequestMethod: `GET`
    - Request example: `http://localhost:8081/tenant_id_3/cpu?readOnly=true`
 3. Get all of the measurements for given tenantId
-   - URL - http://localhost:8080/{tenantId}/measurements
+   - URL - `http://localhost:8080/{tenantId}/measurements`
    - RequestMethod: `GET`
    - Request example: `http://localhost:8081/tenant_id_1/measurements`
