@@ -5,7 +5,8 @@ redis:
 spring:
   application:
     name: ceres-routing-service
-
+  profiles:
+    active: production
 influxdb.enterprise.url: http://localhost:8086
 is.using.influxdb.enterprise: true
 number.of.databases.in.influxdb.instance: 10
